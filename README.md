@@ -4,4 +4,4 @@ This is an improvement of the https://github.com/AlexRuzin/CPP_API winapi obfusc
 
 + add x64 support
 + add compile time randomization hash-table
-+ add obfuscation strings
++ add obfuscation strings(use Hacking Team string obfuscator)
