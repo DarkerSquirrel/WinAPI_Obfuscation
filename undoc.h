@@ -215,12 +215,12 @@ typedef ULONG GDI_HANDLE_BUFFER[GDI_HANDLE_BUFFER_SIZE];
 typedef struct _LDR_MODULE
 {
 
-		LIST_ENTRY e[3];
-		HMODULE    base;
-		void      *entry;
-		UINT       size;
-		UNICODE_STRING dllPath;
-		UNICODE_STRING dllname;
+	LIST_ENTRY e[3];
+	HMODULE    base;
+	void      *entry;
+	UINT       size;
+	UNICODE_STRING dllPath;
+	UNICODE_STRING dllname;
 
 } LDR_MODULE, *PLDR_MODULE;
 

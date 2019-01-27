@@ -16,8 +16,8 @@ HGLOBAL WINAPI cLoadResource(
 	_In_     HRSRC   hResInfo
 );
 
-HANDLE cCreateToolhelp32Snapshot(	DWORD	flags,
-								 	DWORD	pid
+HANDLE cCreateToolhelp32Snapshot(DWORD	flags,
+	DWORD	pid
 );
 
 BOOL cCreateProcessA(__in_opt			LPCSTR					application_name,
@@ -69,7 +69,7 @@ cNtDebugActiveProcess(
 
 
 NTSTATUS
- cNtCreateDebugObject(
+cNtCreateDebugObject(
 	OUT PHANDLE             DebugObjectHandle,
 	IN ACCESS_MASK          DesiredAccess,
 	IN POBJECT_ATTRIBUTES   ObjectAttributes OPTIONAL,
@@ -267,7 +267,7 @@ BOOL cCreateDirectoryA(
 	__in		LPCSTR					path_name,
 	__in_opt	LPSECURITY_ATTRIBUTES	security_attributes);
 
-LPVOID cVirtualAlloc(		LPVOID		address,
+LPVOID cVirtualAlloc(LPVOID		address,
 	__in		SIZE_T		size,
 	__in		DWORD		alloc_type,
 	__in		DWORD		page_security);
