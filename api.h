@@ -228,19 +228,6 @@ NTSTATUS cRtlCreateProcessParametersEx(
 	_In_opt_ PUNICODE_STRING RuntimeData,
 	_In_	 ULONG Flags);
 
-NTSTATUS my_cRtlCreateProcessParametersEx(
-	_Out_	 my_PRTL_USER_PROCESS_PARAMETERS *pProcessParameters,
-	_In_	 PUNICODE_STRING ImagePathName,
-	_In_opt_ PUNICODE_STRING DllPath,
-	_In_opt_ PUNICODE_STRING CurrentDirectory,
-	_In_opt_ PUNICODE_STRING CommandLine,
-	_In_opt_ PVOID Environment,
-	_In_opt_ PUNICODE_STRING WindowTitle,
-	_In_opt_ PUNICODE_STRING DesktopInfo,
-	_In_opt_ PUNICODE_STRING ShellInfo,
-	_In_opt_ PUNICODE_STRING RuntimeData,
-	_In_	 ULONG Flags);
-
 NTSTATUS cNtCreateProcessEx(
 	_Out_    PHANDLE ProcessHandle,
 	_In_     ACCESS_MASK DesiredAccess,
