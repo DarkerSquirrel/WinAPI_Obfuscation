@@ -4,20 +4,6 @@
 #include "sysutil.h"
 #include "api.h"
 
-UINT lenAA(LPCSTR input_string)
-{
-	UINT			out_length = 0;
-	PCHAR			ptr;
-
-	ptr = (PCHAR)input_string;
-	out_length = 0;
-	while (*ptr != 0) {
-		out_length++;
-		ptr++;
-	}
-
-	return out_length;
-}
 
 int main(int argc, char *argv[])
 {
