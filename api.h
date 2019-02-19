@@ -81,14 +81,18 @@ HRSRC cFindResourceA(
 	LPCSTR  lpType
 );
 
+INT clstrcmpiW
+(
+	LPCWSTR str1,
+	LPCWSTR str2
+);
 
-HANDLE cCreateFileA(__in		LPCSTR					file_name,
-	DWORD					access,
-	DWORD					share_mode,
-	LPSECURITY_ATTRIBUTES	security,
-	DWORD					creation_disposition,
-	DWORD					flags,
-	HANDLE					template_file);
+INT cMultiByteToWideChar(__in	UINT		code_page,
+	__in	DWORD		flags,
+	__in	LPCSTR		multibytestr,
+	__in	INT			multi_count,
+	__out_opt LPWSTR		widecharstr,
+	__in	INT			wide_count);
 
 VOID cRtlInitUnicodeString(
 	PUNICODE_STRING DestinationString,
@@ -254,19 +258,13 @@ BOOL cCreateDirectoryA(
 	__in		LPCSTR					path_name,
 	__in_opt	LPSECURITY_ATTRIBUTES	security_attributes);
 
-LPVOID cVirtualAlloc(LPVOID		address,
-	__in		SIZE_T		size,
-	__in		DWORD		alloc_type,
-	__in		DWORD		page_security);
 
 DWORD WINAPI cSizeofResource(
 	_In_opt_ HMODULE hModule,
 	_In_     HRSRC   hResInfo
 );
 
-BOOL WINAPI cFreeResource(
-	_In_ HGLOBAL hglbResource
-);
+
 
 BOOL cOpenProcessToken(
 	HANDLE  ProcessHandle,
@@ -289,25 +287,5 @@ BOOL WINAPI cCloseHandle(
 
 HANDLE cGetCurrentProcess(VOID);
 
-HMODULE cGetModuleHandleW
-(
-	LPCWSTR module
-);
 
-HRSRC cFindResourceW(
-	HMODULE hModule,
-	LPCWSTR  lpName,
-	LPCWSTR  lpType
-);
-
-BOOL cLookupPrivilegeValueW(
-	LPCWSTR lpSystemName,
-	LPCWSTR lpName,
-	PLUID  lpLuid
-);
-
-BOOL cIsWow64Process(
-	HANDLE hProcess,
-	PBOOL  Wow64Process
-);
 

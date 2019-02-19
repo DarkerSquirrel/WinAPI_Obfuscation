@@ -1,8 +1,8 @@
 #pragma once
 
 #include <windows.h>
-#include <stdio.h>
-#include <iostream>
+//#include <stdio.h>
+//#include <iostream>
 
 char* deobfuscate(unsigned char *s) {
 	unsigned char key, mod, len;

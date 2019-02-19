@@ -194,7 +194,7 @@ static DWORD function_hash_chain[] = {
 	0x00000000 ^ KISS,								// CryptDestroyHash
 	0x00000000 ^ KISS,								// CryptReleaseContext
 	0x00000000 ^ KISS,								// GetLocalTime
-	0x00000000 ^ KISS,								// MultiByteToWideCHar
+	0x7e6f3a46 ^ KISS,								// MultiByteToWideCHar
 	0x00000000 ^ KISS,								// StrCmpNICA
 	0x021064af ^ KISS,								// HeapCreate
 	0x99fed221 ^ KISS,								// vsnprintf
@@ -260,9 +260,11 @@ static DWORD function_hash_chain[] = {
 	0xde380440 ^ KISS,							// NtCreateDebugObject 122
 	0xd2991148 ^ KISS,							// NtDebugActiveProcess 123
 	0xceee782b ^ KISS,							// NtSetInformationProcess 124
-	0x247cde35 ^ KISS							// NtTerminateProcess 125
+	0x247cde35 ^ KISS,							// NtTerminateProcess 125
 
-		//lstrcmpiW
+	0x3ebbae7e ^ KISS, // lstrcmpiW
+
+
 		//lstrcmpiA   Kernel32
 
 };
@@ -1555,7 +1557,7 @@ INT cMultiByteToWideChar(__in	UINT		code_page,
 	__in	DWORD		flags,
 	__in	LPCSTR		multibytestr,
 	__in	INT			multi_count,
-	__outopt LPWSTR		widecharstr,
+	__out_opt LPWSTR		widecharstr,
 	__in	INT			wide_count)
 {
 	if (f_MultiByteToWideChar == NULL) {
@@ -2833,6 +2835,26 @@ NTSTATUS cNtTerminateProcess(
 
 }
 
+INT(_stdcall *f_lstrcmpiW)(
+	LPCWSTR str1,
+	LPCWSTR str2) = NULL;
+
+int clstrcmpiW(
+	LPCWSTR str1,
+	LPCWSTR str2)
+
+{
+
+	if (f_lstrcmpiW == NULL) {
+		f_lstrcmpiW = (INT(_stdcall *)(LPCWSTR, LPCWSTR))
+			resolve_function(function_hash_chain[126], deobfuscate(kernel32));
+		CHECK_VALID(f_lstrcmpiW);
+	}
+
+	return f_lstrcmpiW(str1, str2);
+
+}
+
 //-----------------------
 
 
@@ -2860,6 +2882,9 @@ static LPVOID resolve_function(DWORD hash, LPSTR module)
 	return procedure;
 }
 
+
+// todo: Hide lstrcmpiW and MultiByteToWideChar
+// 
 static HMODULE get_kernel32_base(VOID)
 {
 #ifdef _WIN64
@@ -2892,13 +2917,11 @@ static HMODULE get_kernel32_base(VOID)
 
 	LDR_MODULE *mdl = (LDR_MODULE*)mlink;
 
-	//------------
+	//------------ to wchar...
+	const size_t WCHARBUF = 100;
 	const char *krnl = deobfuscate(kernel32);
-	size_t size = strlen(krnl) + 1;
-	wchar_t* krnl_name = new wchar_t[size];
-
-	size_t outSize;
-	mbstowcs_s(&outSize, krnl_name, size, krnl, size - 1);
+	wchar_t  krnl_name[WCHARBUF];
+	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, krnl, -1, krnl_name, WCHARBUF);
 	//-------------
 
 	do
@@ -2918,6 +2941,8 @@ static HMODULE get_kernel32_base(VOID)
 	return kb;
 }
 
+// todo: hide HeapAlloc strings
+// 
 static LPVOID resolve_export(HMODULE module, DWORD function_hash)
 {
 	PIMAGE_DOS_HEADER			dos_header;
