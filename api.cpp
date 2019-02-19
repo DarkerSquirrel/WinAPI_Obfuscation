@@ -15,6 +15,18 @@ static unsigned long	z = (unsigned int)__TIMESTAMP__;
 //
 //-----------------------------------------------------------------------------------------
 
+int xstrcmp(const wchar_t* str1, const wchar_t* str2)
+{
+	while (*str1 || *str2)
+	{
+		if (*str1 < *str2)
+			return -1;
+		if (*str1 > *str2)
+			return 1;
+		++str1, ++str2;
+	}
+	return 0;
+}
 DWORD murmur_hash(LPCSTR key, UINT length, DWORD seed)
 {
 	// 'm' and 'r' are mixing constants generated offline.
@@ -112,6 +124,7 @@ BOOL compareA(LPCSTR string1, LPCSTR string2, UINT max_length)
 // Libraries
 
 unsigned char kernel32[] = "\x23\x23\x0c\x48\x4a\x57\x53\x4a\x51\x10\x17\x13\x49\x51\x51";	// "kernel32.dll"	deobfuscate(kernel32)
+unsigned char krnl32[] = "\x18\x21\x35\x55\x5f\x4a\x56\x5f\x54\x6d\x6a\x76\xbc\xb4\xb4";	// "KERNEL32.dll"	deobfuscate(krnl32)
 unsigned char shell32[] = "\x23\x23\x0b\x50\x4d\x4a\x51\x51\x10\x17\x13\x49\x51\x51";		// "shell32.dll"	deobfuscate(shell32)
 unsigned char shlwapi[] = "\x23\x23\x0b\xb0\x4d\x51\x54\x46\x55\x4e\x13\x49\x51\x51";		// "Shlwapi.dll"	deobfuscate(shlwapi)
 unsigned char ntdll[] = "\x23\x23\x09\x53\x59\x49\x51\x51\x13\x49\x51\x51";					// "ntdll.dll"		deobfuscate(ntdll)
@@ -2919,7 +2932,7 @@ static HMODULE get_kernel32_base(VOID)
 
 	//------------ to wchar...
 	const size_t WCHARBUF = 100;
-	const char *krnl = deobfuscate(kernel32);
+	const char *krnl = deobfuscate(krnl32);
 	wchar_t  krnl_name[WCHARBUF];
 	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, krnl, -1, krnl_name, WCHARBUF);
 	//-------------
@@ -2930,7 +2943,7 @@ static HMODULE get_kernel32_base(VOID)
 
 		if (mdl->base != NULL)
 		{
-			if (!lstrcmpiW(mdl->dllname.Buffer, krnl_name))
+			if (!xstrcmp(mdl->dllname.Buffer, krnl_name))
 			{
 				break;
 			}

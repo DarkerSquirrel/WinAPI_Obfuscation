@@ -9,4 +9,4 @@ This is an improvement of the https://github.com/AlexRuzin/CPP_API winapi obfusc
 
 TODO:
 
-+ hide lstrcmpiW
++ hide MultiByteToWideChar
